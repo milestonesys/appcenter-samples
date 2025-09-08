@@ -1,0 +1,23 @@
+name: "hello-world-app"
+realm: "samples"
+version: 1.0.0
+description: "An App that exposes an endpoint at /hello-world"
+
+prerequisites:
+  systemVersion: ">=0.3.10"
+
+services:
+- name: pub-samples-hello-world
+  routes:
+  - name: hello-world-route
+    port: 80
+    targetPort: 80
+    ingress:
+      rootPath: "/api/samples/hello-world"
+      redirectPath: "/"
+      rules:
+      - path: "/"
+
+  containers:
+  - name: hello-world-container
+    image: sandbox.io/hello-world:1.0.0

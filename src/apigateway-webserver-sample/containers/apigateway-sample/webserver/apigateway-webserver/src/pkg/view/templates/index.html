@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
+  <head>
+    <style>
+      body {
+        color: #489cdc;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      button {
+        display: inline-block;
+        flex: 1;
+        width: 100%;
+        background-color: #489cdc;
+        color: white;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #204b6c;
+      }
+
+      label, select, input, .container {
+        width: 100%;
+      }
+
+      form {
+        flex: 1;
+        display: flex;
+        align-items: start;
+        margin: 3px;
+        flex-direction: column;
+      }
+
+      div {
+        display: flex;
+        align-items: start;
+        margin: 3px;
+      }
+
+      .flex_col {
+        flex-direction: column;
+        width: max-content;
+      }
+    </style>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{{ .AppName }} Home Page</title>
+  </head>
+  <body>
+    <h1>{{ .AppName }} Home Page</h1>
+    <p>Welcome to the {{ .AppName }} Home Page.</p>
+    <p>For more information, see the <a href="https://doc.milestonesys.com/latest/en-US/portal/htm/chapter-page-api-gateway.htm">XProtect VMS API Gateway</a>.</p>
+
+    <div class="flex_col">
+      <form>
+        <div>
+          <div class="flex_col">
+            <div class="container"><label for="flowType">Credentials-flow:</label></div>
+            <div class="container"><label for="hostname">Hostname:</label></div>
+            <div class="container"><label for="secure">Encrypted:</label></div>
+            <div class="container"><label for="username">Username:</label></div>
+            <div class="container"><label for="password">Password:</label></div>
+          </div>
+          <div class="flex_col">
+            <div class="container">
+              <select id="flowType" name="flowType">
+                {{range $index, $element := .CredentialsFlowTypes}}
+                <option value="{{$element}}" {{if eq $index 0}}selected{{end}}>{{$element}}</option>
+                {{end}}
+              </select>
+            </div>
+            <div class="container"><input type="text" id="hostname" name="hostname"></div>
+            <div><input type="checkbox" id="secure" name="secure"></div>
+            <div class="container"><input type="text" id="username" name="username"></div>
+            <div class="container"><input type="password" id="password" name="password"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex_col">
+            <div class="container"><button type="button" id="login">Login</button></div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      const flowTypeSelect = document.querySelector('#flowType');
+      const loginBtn = document.querySelector('#login');
+
+      const hostnameInput = document.querySelector('#hostname');
+      const usernameInput = document.querySelector('#username');
+      const passwordInput = document.querySelector('#password');
+
+      async function login() {
+        const hostname = hostnameInput.value;
+        const secure = document.getElementById('secure').checked;
+        const username = usernameInput.value;
+        const password = passwordInput.value;
+        const credentialsFlowType = flowTypeSelect.value;
+
+        const currentBaseUrl = window.location.origin;
+        const currentPath = window.location.pathname;
+        const loginUrl = new URL(`${currentPath}_login/`, currentBaseUrl).href;
+
+        try {
+          const response = await fetch(loginUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password, hostname, secure, credentialsFlowType })
+          });
+
+          if (!response.ok) {
+            throw (
+              new Error(await response.text())
+            );
+          }
+
+          const data = await response.json();
+
+          const viewEventsUrl = new URL(`${currentPath}view_events/?username=${username}`, currentBaseUrl).href;
+          window.location.assign(viewEventsUrl);
+
+        } catch (error) {
+          console.error(error);
+          return;
+        }
+      }
+
+      // When run with the app center. The hostname will be available at this endpoint. Therefore no need for the user to input the value.
+      async function getVMSHostname() {
+        const currentBaseUrl = window.location.origin;
+        const vms_system_settings = new URL(`/system-settings/vms`, currentBaseUrl);
+        vms_system_settings.port = 80;
+        if (vms_system_settings.protocol === 'https:') {
+          vms_system_settings.port = 443;
+        }
+
+        try {
+          const response = await fetch(vms_system_settings, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+          });
+
+          if (!response.ok) {
+            throw (
+              new Error(`${await response.text()} - Couldn't reach the ${vms_system_settings} endpoint. Have you installed this app using the app center?`)
+            );
+          }
+
+          const data = await response.json();
+
+          hostnameInput.value = data.url;
+
+        } catch (error) {
+          console.error(error);
+          return;
+        }
+      }
+
+      getVMSHostname()
+
+      // Add event listeners to the select elements
+      flowTypeSelect.addEventListener('change', (event) => {
+          if (flowTypeSelect.value.localeCompare('ClientCredentialsFlow') == 0) {
+            usernameInput.disabled = true;
+            passwordInput.disabled = true;
+            usernameInput.value = `app-center`;
+            return;
+          }
+          usernameInput.disabled = false;
+          passwordInput.disabled = false;
+          usernameInput.value = '';
+      });
+
+      loginBtn.addEventListener("click", function() {
+        login();
+      });
+    </script>
+  </body>
+</html>

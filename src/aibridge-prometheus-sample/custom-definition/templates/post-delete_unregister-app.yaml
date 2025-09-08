@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ps-unregister-app
+  namespace: {{ .Release.Name }}
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    spec:
+      imagePullSecrets:
+        {{ include "system.imagePullSecret" "docker.io"  }}
+      containers:
+        - name: ps-unregister-app
+          image: apteno/alpine-jq:2024-08-04
+          imagePullPolicy: Always
+          command: [ "/bin/sh", "-c" ]
+          args:
+            - >
+              curl
+              -f -s -X POST
+              -H "Accept: application/json"
+              -H "Content-type: application/json"
+              --data-binary '{ "query": "{ about { videoManagementSystems { id } } }" }' http://aibridge-webservice.processing-server:4000/api/bridge/graphql
+              |
+              jq '{query: "mutation unregister($input: UnregisterInput!) { unregister(input: $input) { id } }", variables: { input: {id: .data.about.videoManagementSystems[0].id, apps: ["45b13290-f583-4d26-951e-142a4836172e"]}}}'
+              |
+              curl
+              -f -s -X POST
+              -H "Accept: application/json"
+              -H "Content-type: application/json"
+              --data-binary @- http://aibridge-webservice.processing-server:4000/api/bridge/graphql
+      restartPolicy: OnFailure
+  backoffLimit: 6

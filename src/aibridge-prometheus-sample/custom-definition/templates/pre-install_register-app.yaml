@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ps-register-app
+  namespace: {{ .Release.Name }}
+  labels:
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    spec:
+      imagePullSecrets:
+        {{ include "system.imagePullSecret" "docker.io"  }}
+      containers:
+        - name: ps-register-app
+          image: apteno/alpine-jq:2024-08-04
+          imagePullPolicy: Always
+          command: [ "/bin/sh", "-c" ]
+          args:
+            - >
+              curl
+              -f -s -X POST
+              -H "Accept: application/json"
+              -H "Content-type: application/json"
+              --data-binary '{ "query": "{ about { videoManagementSystems { id } } }" }' http://aibridge-webservice.processing-server:4000/api/bridge/graphql
+              |
+              jq ' {
+                query: "mutation registerApp($input: RegisterInput!) { register(input: $input) { id } }",
+                variables: {
+                  input: {
+                    id: .data.about.videoManagementSystems[0].id,
+                    apps: [ {
+                        id: "45b13290-f583-4d26-951e-142a4836172e",
+                        name: "Sample Prometheus AIbridge App",
+                        description: "This is a description",
+                        url:  "http://{{ template "system.ip"  }}/grafana/d/aeiyyzfkfzapsa/new-dashboard?orgId=1&theme=light&kiosk"
+                      } ]
+                  }
+                }
+              }'
+              |
+              curl
+              -f -s -X POST
+              -H "Accept: application/json"
+              -H "Content-type: application/json"
+              --data-binary @- http://aibridge-webservice.processing-server:4000/api/bridge/graphql
+      restartPolicy: OnFailure
+  backoffLimit: 6

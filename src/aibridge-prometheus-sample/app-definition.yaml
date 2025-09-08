@@ -1,0 +1,31 @@
+name: "aibridge-prometheus-sample"
+realm: "samples"
+version: 1.0.0
+description: Sample using the AIBridge and Prometheus to create a Grafana dashboard.
+
+prerequisites:
+  systemVersion: ">=0.3.10"
+
+dashboards:
+  grafana:
+    import:
+      - "files/aibridge-prometheus-sample-dashboard.json"
+
+services:
+- name: pub-samples-aibridge-prometheus-sample
+  routes:
+  - name: aibridge-prometheus-sample-route
+    port: 9090
+    targetPort: 9090
+    ingress:
+      rootPath: "/api/samples/aibridge-prometheus-sample"
+      redirectPath: "/"
+      rules:
+      - path: "/"
+
+  containers:
+  - name: aibridge-prometheus-sample
+    image: sandbox.io/aibridge-prometheus-sample:1.0.0
+    ports:
+      - name: app-metrics
+        containerPort: 9090

@@ -1,0 +1,29 @@
+name: "apigateway-sample"
+realm: "samples"
+version: 1.0.0
+description: Sample using the api gateway
+
+prerequisites:
+  systemVersion: ">=0.3.10"
+
+credentials:
+  clientCredentialsFlow:
+    clientName: "apigateway-sample-service"
+    clientScopes: [ "managementserver" ]
+
+
+services:
+- name: pub-samples-apigateway-sample-webserver
+  routes:
+  - name: apigateway-sample-route
+    port: 8080
+    targetPort: 8080
+    ingress:
+      rootPath: "/api/samples/apigateway-sample-webserver"
+      redirectPath: "/"
+      rules:
+      - path: "/"
+
+  containers:
+  - name: apigateway-sample
+    image: sandbox.io/apigateway-sample/webserver:1.0.0

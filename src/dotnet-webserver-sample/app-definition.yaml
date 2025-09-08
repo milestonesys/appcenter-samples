@@ -1,0 +1,23 @@
+name: "dotnet-sample"
+realm: "samples"
+version: 0.1.5
+description: A dotnet sample application
+
+prerequisites:
+  systemVersion: ">=0.3.10"
+
+services:
+- name: pub-samples-dotnet-sample
+  routes:
+  - name: dotnet-sample-route
+    port: 80
+    targetPort: 80
+    ingress:
+      rootPath: "/api/samples/dotnet-sample"
+      redirectPath: "/"
+      rules:
+      - path: "/"
+
+  containers:
+  - name: dotnet-sample
+    image: sandbox.io/dotnet-sample/webserver:0.0.1

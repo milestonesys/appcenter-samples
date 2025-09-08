@@ -1,0 +1,38 @@
+name: "postgresql-app"
+realm: "samples"
+version: 1.0.0
+description: "An App that uses a private PostgreSQL database"
+
+prerequisites:
+  systemVersion: ">=0.3.10"
+
+databases:
+  postgresql:
+    name: "samples.todo-db"
+    schema: 
+    - |
+      create table if not exists tasks (
+        id serial primary key,
+        description text not null
+      );
+
+services:
+- name: samples-todo-service
+  containers:
+  - name: todo-container
+    image: sandbox.io/todo:1.0.0
+    args:
+    - "/bin/bash"
+    - "-c"
+    - |
+      todo add item1
+      todo add item2
+      todo add item3
+      todo list
+
+      sleep 1000 &
+      pid=$!
+      trap "kill -s TERM ${pid}; wait -n ${pid}; exit $?" SIGINT
+      trap "kill -s TERM ${pid}; wait -n ${pid}; exit $?" SIGTERM
+      trap "kill -s TERM ${pid}; wait -n ${pid}; exit $?" SIGKILL
+      wait ${pid}

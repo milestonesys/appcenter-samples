@@ -1,0 +1,7 @@
+requests==2.32.3
+numpy==2.2.4
+pandas==2.2.3
+fastapi==0.115.12
+fastapi-cli==0.0.7
+prometheus-client==0.21.1
+pydantic_settings==2.8.1

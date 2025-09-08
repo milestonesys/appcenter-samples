@@ -1,0 +1,24 @@
+name: "kafka-app"
+realm: "samples"
+version: 1.0.0
+description: "An App that uses kafka to produce and consume messages"
+
+prerequisites:
+  systemVersion: ">=0.3.10"
+
+messaging:
+  kafka:
+    consumerTopics:
+    - name: "samples.my-topic"
+    producerTopics:
+    - name: "samples.my-topic"
+
+services:
+- name: samples-producer-service
+  containers:
+  - name: producer-container
+    image: sandbox.io/kafka/producer:1.0.0
+- name: samples-consumer-service
+  containers:
+  - name: consumer-container
+    image: sandbox.io/kafka/consumer:1.0.0

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
+  <head>
+    <style>
+      body {
+        color: #489cdc;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      button {
+        display: inline-block;
+        flex: 1;
+        width: 100%;
+        background-color: #489cdc;
+        color: white;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #204b6c;
+      }
+
+      label, select, input, textarea {
+        width: 100%;
+      }
+
+      table {
+        width: 100%;
+        border: 1px solid black;
+        align-content: start;
+        table-layout: fixed;
+      }
+      th, td {
+          text-align: start;
+      }
+      th {
+          border-bottom: 1px solid black;
+      }
+
+      div {
+        flex: 1;
+        display: flex;
+        align-items: start;
+        margin: 3px;
+      }
+
+      .flex_col {
+        flex-direction: column;
+        width: max-content;
+      }
+
+      .container {
+        width: 100%;
+      }
+    </style>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{{ .AppName }} View Events Page</title>
+  </head>
+  <body>
+    <h1>{{ .AppName }} View Events Page</h1>
+
+    <div>
+      <div class="flex_col">
+        <div class="container"><select id="cameraSelect"></select></div>
+        <div class="container"><textarea id="cameraInfo" rows="10"></textarea></div>
+      </div>
+
+      <div class="flex_col">
+        <div class="container"><select id="eventTypeSelect"></select></div>
+        <div class="container"><textarea id="eventTypeInfo" rows="10"></textarea></div>
+      </div>
+
+      <div class="flex_col" style="min-width: 15%; max-width: 20%;">
+        <div class="container"><button type="button" id="fetchEventsButton">Fetch Events</button></div>
+        <div class="container"><textarea id="sessionInfo" rows="10"></textarea></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="flex_col">
+      <div class="container"><table>
+          <thead>
+            <tr>
+          <th>id</th>
+          <th>type</th>
+          <th>source</th>
+          <th>timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="eventsTableBody">
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <script>
+      // Data written by the template writter
+      const GLOBAL_DATA = {
+          cameras: JSON.parse('{{ .Cameras }}'),
+          eventTypes: JSON.parse('{{ .EventTypes }}'),
+          username: '{{ .Username }}',
+          session: JSON.parse('{{ .Session }}')
+      };
+
+      window.fetchEventsController = new AbortController();
+      const cameraSelect = document.querySelector('#cameraSelect');
+      const eventsSelect = document.querySelector('#eventTypeSelect');
+      const cameraInfo = document.querySelector('#cameraInfo');
+      const eventTypeInfo = document.querySelector('#eventTypeInfo');
+      const sessionInfo = document.querySelector('#sessionInfo');
+      const tableBody = document.querySelector('#eventsTableBody');
+      const fetchEventsBtn = document.querySelector('#fetchEventsButton');
+      
+      async function fillDataSelectElement(selectElem, textareaElem, options) {
+        // Fill the selector elements with options
+        options.forEach(option => {
+            const optionElem = document.createElement('option');
+            optionElem.value = option.id;
+            optionElem.textContent = option.displayName;
+            selectElem.appendChild(optionElem);
+        });
+
+        // Add event listeners to the select elements
+        selectElem.addEventListener('change', (event) => {
+            const selectedOption = options.find(option => option.id === event.target.value);
+            textareaElem.textContent = JSON.stringify(selectedOption, null, 2);
+        });
+
+        // Select the first item by default
+        if (options.length > 0) {
+            selectElem.value = options[0].id;
+            textareaElem.textContent = JSON.stringify(options[0], null, 2);
+        }
+      }
+
+      // Update session info and resume event fetching
+      async function updateSessionInfo(sessionData) {
+        if (sessionData && sessionData.sessionId && sessionData.sessionId.trim() !== '') {
+          sessionInfo.textContent = JSON.stringify(sessionData, null, 2);
+        } else {
+          sessionInfo.textContent = 'No session data available';
+        }
+      }
+
+      // Fetch events
+      async function startFetchingEvents(signal) {
+        const username = GLOBAL_DATA.username;
+
+        const currentBaseUrl = window.location.origin;
+        const currentPath = window.location.pathname;
+        const requestEventsUrl = new URL(`${currentPath}_events_request/`, currentBaseUrl).href;
+
+        while (!signal.aborted) {
+          try {
+            const response = await fetch(requestEventsUrl, {
+              method: 'POST',
+              signal: signal,
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ username })
+            });
+            
+            if (!response.ok) {
+              throw (
+                new Error(await response.text())
+              );
+            }
+
+            const data = await response.json();
+
+            data.forEach(event => {
+              const row = document.createElement('tr');
+              const cell1 = document.createElement('td');
+              cell1.textContent = event.id;
+              const cell2 = document.createElement('td');
+              cell2.textContent = event.type;
+              const cell3 = document.createElement('td');
+              cell3.textContent = event.source;
+              const cell4 = document.createElement('td');
+              cell4.textContent = event.time;
+              row.appendChild(cell1);
+              row.appendChild(cell2);
+              row.appendChild(cell3);
+              row.appendChild(cell4);
+              tableBody.appendChild(row);
+            });
+          } catch (error) {
+            console.error(error);
+            return;
+          }
+        }
+      }
+
+      function resetAbortController(reason) {
+        window.fetchEventsController.abort(reason);
+        if(window.fetchEventsController){
+          delete window.fetchEventsController;
+        }
+        window.fetchEventsController = new AbortController();
+      }
+
+      // Subscribe to events
+      async function subscribeToEvents() {
+        const cameraId = cameraSelect.value;
+        const eventTypeId = eventsSelect.value;
+        const username = GLOBAL_DATA.username;
+
+        const currentBaseUrl = window.location.origin;
+        const currentPath = window.location.pathname;
+        const startSubscriptionUrl = new URL(`${currentPath}_events_start/`, currentBaseUrl).href;
+
+        // Abort fetching events
+        resetAbortController("User requested to subscribe to a different source or event type");
+        
+        try {
+          const response = await fetch(startSubscriptionUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, cameraId, eventTypeId })
+          });
+
+          if (!response.ok) {
+            throw (
+              new Error(await response.text())
+            );
+          }
+
+          const data = await response.json();
+
+          updateSessionInfo(data.session);
+          
+          startFetchingEvents(window.fetchEventsController.signal);
+
+        } catch (error) {
+          console.error(error);
+          return;
+        }
+      }
+
+      fillDataSelectElement(cameraSelect, cameraInfo, GLOBAL_DATA.cameras);
+      fillDataSelectElement(eventsSelect, eventTypeInfo, GLOBAL_DATA.eventTypes);
+      updateSessionInfo(GLOBAL_DATA.session);
+
+      fetchEventsBtn.addEventListener("click", function() {
+        subscribeToEvents();
+      });
+
+      window.addEventListener('beforeunload', () => {
+        // Abort fetching events
+        resetAbortController("Refresh screen will stop all process");
+      });
+    </script>
+  </body>
+</html>
