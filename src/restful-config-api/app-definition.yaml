@@ -1,0 +1,23 @@
+name: "restful-config-api-app"
+realm: "samples"
+version: 1.0.0
+description: A sample application demonstrating using the RESTful Config API
+
+prerequisites:
+  systemVersion: ">=0.3.10"
+
+services:
+- name: pub-samples-restful-config-api
+  routes:
+  - name: restful-config-api-route
+    port: 8501
+    targetPort: 8501
+    ingress:
+      rootPath: "/api/samples/restful-config-api"
+      redirectPath: "/"
+      rules:
+      - path: "/"
+
+  containers:
+  - name: restful-config-api-container
+    image: sandbox.io/restful-config-api:1.0.0
