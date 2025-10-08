@@ -1,14 +1,15 @@
 # Use official Python 3.10 image
 FROM python:3.10-slim
 
-# Set working directory
 WORKDIR /restful-config-api
 
-# Copy project files
-COPY /restful-config-api .
+# Copy requirements file and install dependencies
+COPY containers/restful-config-api/requirements.txt /restful-config-api/requirements.txt
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install -r requirements.txt --no-cache-dir
+
+# Copy application code
+COPY containers/restful-config-api/ /restful-config-api/
 
 # Expose default Streamlit port
 EXPOSE 8501
