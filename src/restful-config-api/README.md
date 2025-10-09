@@ -1,14 +1,6 @@
 # RESTful Config API Sample
 
-A Python sample application demonstrating how to use the XProtect API Gateway from a Python application. The sample logs into the server, creates, gets, updates, and deletes a user-defined event, with diagnostic output along the way.
-
-## Overview
-
-This sample shows how to:
-- Authenticate with XProtect Identity Provider
-- Use the RESTful Config API to manage user-defined events
-- Create a modern web interface using Streamlit TODO
-- Package and deploy Python applications in containers for App Center
+A sample application demonstrating how to use the XProtect API Gateway from a Python application. The sample logs into the server, creates, gets, updates, and deletes a user-defined event, with diagnostic output along the way. The sample uses [Streamlit](https://streamlit.io/) for creating a web interface.
 
 ## Prerequisites
 
