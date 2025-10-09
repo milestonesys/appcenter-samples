@@ -2,6 +2,8 @@
 
 A sample application demonstrating how to use the XProtect API Gateway from a Python application. The sample logs into the server, creates, gets, updates, and deletes a user-defined event, with diagnostic output along the way. The sample uses [Streamlit](https://streamlit.io/) for creating a web interface.
 
+![RESTful Config API Sample](./../../img/restful-config-api.png)
+
 ## Prerequisites
 
 - XProtect 2021 R2 or later
