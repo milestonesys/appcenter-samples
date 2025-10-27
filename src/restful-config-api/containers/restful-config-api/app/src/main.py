@@ -1,7 +1,8 @@
 import json
 import os
 import requests
-from src import IdentityProvider, Gateway
+from identity_provider import IdentityProvider
+from api_gateway import Gateway
 import streamlit as st
 
 def main():
