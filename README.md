@@ -1,4 +1,4 @@
-# Private Cloud Samples
+# App Center samples
 This repository contains sample applications for the new Runtime Environment and App Center. 
 
 ![AppCenter](./img/app-center.png)
@@ -14,6 +14,8 @@ In the following we assume that
 * You have a *developer* machine with Docker, Kubectl and helm installed to work with the samples. You can run the script [src/utils/setup.sh)](src/utils/setup.sh) to pair your developer machine with the cluster and install, if missing, all the needed dependencies.
 * You have to run the `init` script in the [build/](build/init.sh) directory to get the latest app builder and install any missing dependencies.
 * Remember to add the IP and port of your cluster's sandbox e.g. `10.10.10.10:5000` in the /etc/docker/daemon.json and restart the docker engine. `{"insecure-registries" : [ "10.10.10.10:5000" ]}`
+
+For more infomration, see our [App Center and App Builder documentation](https://download.milestonesys.com/app-builder/Documentation/)
 
 ### Additional dependencies
 To ensure everything runs smoothly, make sure the following tools are installed in the development machine:
@@ -37,7 +39,7 @@ To ensure everything runs smoothly, make sure the following tools are installed 
 This repository is structured in two main directories. 
 
 ```bash
-private-cloud-samples
+appcenter-samples
 ├── build
 │   └── common.mak
 ├── README.md
@@ -52,7 +54,7 @@ private-cloud-samples
     ...
 ```
 
-In the `build` directory, you'll find the `common.mak` file, which defines shared commands for building and managing the samples. Each sample directory includes its own `Makefile` that imports `common.mak` to leverage these commands. Under the hood, `common.mak` uses the App Builder (find more info [here](https://download.milestonesys.com/app-builder/README.pdf)), which provides all the necessary commands to build, push, and install your application.
+In the `build` directory, you'll find the `common.mak` file, which defines shared commands for building and managing the samples. Each sample directory includes its own `Makefile` that imports `common.mak` to leverage these commands. Under the hood, `common.mak` uses the App Builder (find more info [here](https://download.milestonesys.com/app-builder/Documentation/App-Builder.pdf)), which provides all the necessary commands to build, push, and install your application.
 
 To work with a sample, navigate to its directory (where the `Makefile` is located) and run `make build` to build the Docker image and Helm chart for that sample.
 
