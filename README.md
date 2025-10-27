@@ -30,7 +30,7 @@ To ensure everything runs smoothly, make sure the following tools are installed 
 ## Samples
 * [Hello World](src/hello-world/)
 * [.NET Webserver](src/dotnet-webserver-sample/)
-* [PostgreSQL](src/postgresql-sample/)
+* [PostgreSQL](src/postgresql/)
 * [Kafka Topics](src/kafka-topics/)
 * [AIBridge & Prometheus](src/aibridge-prometheus-sample/)
 * [API Gateway Webserver](src/apigateway-webserver-sample/)
@@ -48,7 +48,7 @@ appcenter-samples
     ├── apigateway-webserver-sample
     ├── dotnet-webserver-sample
     ├── hello-world
-    ├── postgresql-sample
+    ├── postgresql
     └── utils
         └── auth.ps1
     ...
