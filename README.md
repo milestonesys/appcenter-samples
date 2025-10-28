@@ -48,6 +48,7 @@ private-cloud-samples
     ├── dotnet-webserver-sample
     ├── hello-world
     ├── postgresql-sample
+    ├── restful-config-api
     └── utils
         └── auth.ps1
     ...
