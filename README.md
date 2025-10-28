@@ -32,6 +32,7 @@ To ensure everything runs smoothly, make sure the following tools are installed 
 * [Kafka Topics](src/kafka-topics/)
 * [AIBridge & Prometheus](src/aibridge-prometheus-sample/)
 * [API Gateway Webserver](src/apigateway-webserver-sample/)
+* [RESTful Config API](src/restful-config-api/)
 
 ## How to run a sample
 This repository is structured in two main directories. 
@@ -47,6 +48,7 @@ private-cloud-samples
     ├── dotnet-webserver-sample
     ├── hello-world
     ├── postgresql-sample
+    ├── restful-config-api
     └── utils
         └── auth.ps1
     ...
