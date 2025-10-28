@@ -193,7 +193,7 @@ class Gateway:
 
         :returns: requests.Response object
         """
-        url = url = self.__url(resource_plural)
+        url = self.__url(resource_plural)
         return self.__request(session, "POST", url, token, payload=payload)
 
     def update_item(
@@ -215,7 +215,7 @@ class Gateway:
 
         :returns: requests.Response object
         """
-        url = url = self.__url(resource_plural, obj_id=obj_id)
+        url = self.__url(resource_plural, obj_id=obj_id)
         return self.__request(session, "PUT", url, token, payload=payload)
 
     def delete_item(

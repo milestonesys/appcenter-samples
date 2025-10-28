@@ -13,7 +13,7 @@ def main():
     legacy_use_tls = os.getenv("LEGACY_USE_TLS") # Whether the XProtect server uses TLS
     legacy_management_server = os.getenv("LEGACY_MANAGEMENT_SERVER") # The hostname of the Management Server in XProtect
 
-    if legacy_use_tls:
+    if legacy_use_tls.lower() == "true":
         server_url = "https://" + legacy_management_server
     else:
         server_url = "http://" + legacy_management_server

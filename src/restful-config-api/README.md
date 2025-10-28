@@ -6,20 +6,24 @@ A sample application demonstrating how to use the XProtect API Gateway from a Py
 
 ## Prerequisites
 
-- XProtect 2021 R2 or later
+- XProtect installation
 - The API Gateway installed on the same host as the management server
 - A user with the Administrators role
-- Python version 3.7 or newer
+- Python version 3.10 or newer
 
 ## Environment Setup
 
-### Required Environment Variables
+### Environment Variables
+
+This sample is designed to run in a container where the following environment variables are provided by the container runtime:
 
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `SYSTEM_IDENTITY_PROVIDER` | URL of the Identity Provider | `https://your-management-server.com/IDP` |
 | `LEGACY_USE_TLS` | Whether XProtect server uses TLS | `true` or `false` |
 | `LEGACY_MANAGEMENT_SERVER` | Management Server hostname | `your-management-server.com` |
+
+For local development, set these variables in the `.env` file.
 
 ### Local Development Setup
 
@@ -53,7 +57,7 @@ A sample application demonstrating how to use the XProtect API Gateway from a Py
 
 4. **Run the application:**
    ```bash
-   streamlit run restful_communication.py
+   streamlit run main.py
    ```
 
 ### Container Deployment
@@ -74,23 +78,27 @@ docker run -p 8501:8501 \
 
 ### App Center Deployment
 
-When deployed through App Center, environment variables are automatically configured and should not be set manually.
+Use the make commands described in the top-level README file to build and manage the sample.
+
+When deployed through App Center, environment variables are automatically configured and should not be set manually. Remove the `.env` file before building and pushing your sample application to App Center.
 
 ## Project Structure
 
 ```
 restful-config-api/
-├── .env.example                    # Environment variables template
+├── .env.example                    # Environment variables template, only needed for local development
 ├── app-definition.yaml             # App Center configuration
+├── Makefile                        # Build automation
 ├── containers/
-│   ├── Dockerfile                  # Container build instructions
 │   └── restful-config-api/
-│       ├── requirements.txt        # Python dependencies
-│       ├── restful_communication.py # Main application code
-│       └── src/                    # Source modules
-│           ├── api_gateway.py      # API Gateway client
-│           ├── identity_provider.py # Authentication handler
-│           └── __init__.py
+│       ├── Dockerfile              # Container build instructions
+│       └── app/
+│           ├── requirements.txt    # Python dependencies
+│           └── src/
+│               ├── __init__.py
+│               ├── main.py         # Main application code
+│               ├── api_gateway.py  # API Gateway client
+│               └── identity_provider.py # Authentication handler
 └── README.md                       # This file
 ```
 
