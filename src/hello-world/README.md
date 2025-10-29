@@ -59,7 +59,7 @@ make events
 
 Once deployed, the application will be available at:
 ```
-https://<your-cluster-domain>/api/samples/hello-world/
+http://<your-cluster-domain>/api/samples/hello-world/
 ```
 
 Replace `<your-cluster-domain>` with your actual cluster domain.

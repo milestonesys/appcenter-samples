@@ -89,7 +89,7 @@ Once you are in shell mode in the Postgresql pod access the `psql`
 ```bash
 > psql
 # List all DBs
-\l
+> \l
 # Output
                                                       List of databases
       Name       |      Owner      | Encoding | Locale Provider | Collate | Ctype | Locale | ICU Rules |   Access privileges
