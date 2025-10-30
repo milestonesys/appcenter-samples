@@ -14,7 +14,7 @@ This sample demonstrates:
 
 Apache Kafka is an open-source distributed event streaming platform used by thousands of companies for high-performance data pipelines, streaming analytics, data integration, and mission-critical applications [Kafka](https://kafka.apache.org/). Core concepts:
 - **Topic**: A named stream of records. Topics are split into partitions for scalability.
-- **Partition**: is an essential components within Kafka's distributed architecture that enable Kafka to scale horizontally, allowing for efficient parallel data processing
+- **Partition**: is an essential component within Kafka's distributed architecture that enable Kafka to scale horizontally, allowing for efficient parallel data processing
 - **Producer**: Writes records to topics.
 - **Consumer**: Reads records from topics.
 - **Broker**: A Kafka server that stores partitions and serves produce / fetch requests.
