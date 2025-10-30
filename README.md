@@ -48,7 +48,8 @@ appcenter-samples
     ├── apigateway-webserver-sample
     ├── dotnet-webserver-sample
     ├── hello-world
-    ├── postgresql
+    ├── postgresql-sample
+    ├── restful-config-api
     └── utils
         └── auth.ps1
     ...
