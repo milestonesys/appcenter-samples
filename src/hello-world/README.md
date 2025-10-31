@@ -29,12 +29,13 @@ First use the login command to connect your running cluster.
 
 ```bash
 cd src/hello-world
-make login
+# Login is only required once to connect to the cluster
+make login # “logging in” to the cluster from your machine 
 make build # builds both the image and the chart
 ```
 
 ### Deploy to App Center
-Push the application to your cluster's Sandbox registry and install it:
+Push the application to your cluster's `sandbox` registry and install it:
 
 ```bash
 # Push to registry and repository

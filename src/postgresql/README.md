@@ -32,6 +32,18 @@ The application automatically creates a PostgreSQL database with:
   - `description` (text, not null)
 
 The database schema is defined in `app-definition.yaml` and automatically initialized when the app is deployed.
+```yaml
+databases:
+  postgresql:
+    name: "samples.todo-db"
+    schema: 
+    - |
+      create table if not exists tasks (
+        id serial primary key,
+        description text not null
+      );
+
+```
 
 ## How to Build and Deploy
 

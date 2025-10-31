@@ -1,6 +1,6 @@
 # Kafka Topics Sample
 
-A sample application that demonstrates producing and consuming messages with Apache Kafka in Runtime Platform. The sample consists of two Go services: a producer that continuously publishes test messages and a consumer that reads them from the same topic.
+A sample application that demonstrates producing and consuming messages to and from  Apache Kafka in Runtime Platform. The sample consists of two Go services: a producer that continuously publishes test messages and a consumer that reads them from the same topic.
 
 ## Overview
 
@@ -17,7 +17,7 @@ Apache Kafka is an open-source distributed event streaming platform used by thou
 - **Partition**: is an essential component within Kafka's distributed architecture that enable Kafka to scale horizontally, allowing for efficient parallel data processing
 - **Producer**: Writes records to topics.
 - **Consumer**: Reads records from topics.
-- **Broker**: A Kafka server that stores partitions and serves produce / fetch requests.
+- **Broker**: A Kafka server that stores partitions and serves produce / consume requests.
 
 ## Sample Structure
 
