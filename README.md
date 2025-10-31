@@ -1,5 +1,5 @@
-# App Center samples
-This repository contains sample applications for the new Runtime Environment and App Center. 
+# App Center Samples
+This repository contains sample applications for the new Runtime Platform and App Center. 
 
 ![AppCenter](./img/app-center.png)
 
@@ -7,7 +7,7 @@ This repository contains sample applications for the new Runtime Environment and
 
 In the following we assume that
 
-* You have successfully run the installation wizard, which has set up a system consisting of one or more servers. The wizard deploys the new `Runtime Environment` to your Linux server and installs all essential services along with the App Center. The App Center acts as the main hub for installing, uninstalling, and updating applications.
+* You have successfully run the installation wizard, which has set up a system consisting of one or more servers. The wizard deploys the new `Runtime Platform` to your Linux server and installs all essential services along with the App Center. The App Center acts as the main hub for installing, uninstalling, and updating applications.
 * You have configured the system with the *sandbox* developer option enabled (use the `--cluster-sandbox` option for the installation wizard).
 * You have configured the system with the *kubernetes dashboard* and *helm dashboard* enabled (use the `--cluster-dev-mode` option for the installation wizard)
 * You have the credentials needed to SSH into one of the servers of the system (one of the master nodes).
