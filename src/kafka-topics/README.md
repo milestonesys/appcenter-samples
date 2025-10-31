@@ -12,7 +12,7 @@ This sample demonstrates:
 
 ## What is Apache Kafka?
 
-Apache Kafka is an open-source distributed event streaming platform used by thousands of companies for high-performance data pipelines, streaming analytics, data integration, and mission-critical applications [Kafka](https://kafka.apache.org/). Core concepts:
+[Apache Kafka](https://kafka.apache.org/) is an open-source distributed event streaming platform used by thousands of companies for high-performance data pipelines, streaming analytics, data integration, and mission-critical applications. Core concepts:
 - **Topic**: A named stream of records. Topics are split into partitions for scalability.
 - **Partition**: is an essential component within Kafka's distributed architecture that enable Kafka to scale horizontally, allowing for efficient parallel data processing
 - **Producer**: Writes records to topics.
