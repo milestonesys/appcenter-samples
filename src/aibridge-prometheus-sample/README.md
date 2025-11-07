@@ -143,8 +143,8 @@ For a Helm chart to be considered an app, it must use the `app-registration` cha
 
 ### How to Enable Sandbox
 
-When running the [installation wizard](https://download.milestonesys.com/private-cloud/), use the `-sandbox` flag to enable the sandbox.  
-Optionally, use the `dev-mode` flag to enable the Kubernetes and Helm dashboards for debugging.
+When running the installation wizard, use the `--cluster-sandbox` flag to enable the sandbox.  
+Optionally, use the `--cluster-dev-mode` flag to enable the Kubernetes and Helm dashboards for debugging.
 
 The Helm chart can be pushed to the sandbox Helm repository at `http://<system-ip>/app-sandbox`.  
 We use [ChartMuseum](https://chartmuseum.com/) as the backend. See [API documentation](https://github.com/helm/chartmuseum?tab=readme-ov-file#api).
@@ -261,7 +261,7 @@ make install-chart-from-repo
 To verify the app is running:
 
 ```bash
-curl -X GET http://<system-ip>/aibridge-prometheus-sample/api/get-server-status
+curl -X GET http://<system-ip>/api/samples/aibridge-prometheus-sample/v1/get-server-status
 ```
 
 This ensures your app is up and running.
@@ -289,7 +289,7 @@ For cluster deployment, use the Makefile as described above.
 ## AIBridge
 
 AIBridge provides integration with XProtect on Windows App Center.  
-To use **AIBridge**, install the Processing Server plugin in the Management Client ([download here](https://download.milestonesys.com/aibridge/plugins/)), and install the **Processing Server** app in App Center.
+To use **AIBridge**, install the Processing Server plugin in the Management Client (from the official Milestone web page), and install the **Processing Server** app in App Center.
 
 AIBridge allows you to get video, VMS/camera info, send events, etc.  
 For example, to get video via RTSP from a deployed app in the cluster:
@@ -308,8 +308,8 @@ In the Helm chart under `templates`, the Jobs *post-delete_unregister-app* and *
 Example API calls:
 
 ```bash
-curl -X GET http://<system-ip>/aibridge-prometheus-sample/api/vms-info
-curl -X GET http://<system-ip>/aibridge-prometheus-sample/api/get-server-status
+curl -X GET http://<system-ip>/api/samples/aibridge-prometheus-sample/v1/vms-info
+curl -X GET http://<system-ip>/api/samples/aibridge-prometheus-sample/v1/get-server-status
 ```
 
 ## Prometheus
@@ -368,7 +368,7 @@ kubectl -n prometheus port-forward svc/prometheus-server 8888:80 --address <ip-a
 In the cluster, access Grafana at `http://<system-ip>/grafana`.  
 You can create dashboards and export them as JSON files.  
 To use a dashboard in your app, create a ConfigMap in Kubernetes.  
-See an example below and the ConfigMap for this app [here](./helm-charts/aibridge-prometheus-sample/templates/config.yaml):
+See an example below and the ConfigMap for this app:
 
 ```yaml
 apiVersion: v1
@@ -389,6 +389,6 @@ When the app is registered as an AIBridge app, a URL is registered and shown in 
 This URL points to the Grafana dashboard:  
 `http://{{ template "system.ip" }}/grafana/d/aeiyyzfkfzapsa/new-dashboard?orgId=1&theme=light&kiosk`  
 - `aeiyyzfkfzapsa` is the UID of the dashboard (found in the exported JSON).
-- See the manifest YAML that registers the URL [here](./helm-charts/aibridge-prometheus-sample/templates/pre-install_register-app.yaml).
+- See the manifest YAML that registers the URL [here](./custom-definition/templates/pre-install_register-app.yaml).
 
 ---
