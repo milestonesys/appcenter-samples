@@ -8,7 +8,7 @@ def create_app() -> FastAPI:
     Create and configure the FastAPI application.
     """
     app = FastAPI(debug=True)
-    app.include_router(router.router, prefix="/api")
+    app.include_router(router.router, prefix="/v1")
 
     # Add Prometheus endpoint to scrape metrics
     metrics_app = make_asgi_app()
