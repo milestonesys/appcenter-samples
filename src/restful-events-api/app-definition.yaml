@@ -1,0 +1,28 @@
+name: "restful-events-api-app"
+realm: "samples"
+version: 1.0.0
+description: A sample application demonstrating using the RESTful Events API
+
+prerequisites:
+  systemVersion: ">=0.3.10"
+
+credentials:
+  clientCredentialsFlow:
+    clientName: "restful-events-api"
+    clientScopes: [ "managementserver" ]
+    
+services:
+- name: pub-samples-restful-events-api
+  routes:
+  - name: restful-events-api-route
+    port: 8501
+    targetPort: 8501
+    ingress:
+      rootPath: "/api/samples/restful-events-api"
+      redirectPath: "/"
+      rules:
+      - path: "/"
+
+  containers:
+  - name: restful-events-api-container
+    image: sandbox.io/restful-events-api:1.0.0
