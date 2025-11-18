@@ -9,7 +9,7 @@ import streamlit as st
 def main():
     clientId = os.getenv("CCF_CLIENT_ID")  # The client ID read from the environment
     clientSecret = os.getenv("CCF_CLIENT_SECRET")  # The client secret read from the environment
-    legacyUseTls = os.getenv("LEGACY_USE_TLS") # Whether the XProtect server uses TLS
+    legacyUseTls = os.getenv("LEGACY_USE_TLS")  # Whether the XProtect server uses TLS
     legacyManagementServer = os.getenv("LEGACY_MANAGEMENT_SERVER")  # The hostname of the management server, assuming that the API Gateway has been installed on the same host
     verify = legacyUseTls.lower() == "true"  
 
