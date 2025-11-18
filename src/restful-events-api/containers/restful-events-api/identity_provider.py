@@ -16,7 +16,7 @@ def get_token_secret(
     :param clientId: The client ID of an XProtect user with the XProtect Administrators role
     :param clientSecret: The secret of the client logging in
     :param serverUrl: The hostname of the machine hosting the identity provider, e.g. "vms.example.com"
-
+    :param verify: Whether to verify the server's TLS certificate (passed to requests). Set to True to verify, False to skip verification.
     :returns: session.Response object. The value of the 'access_token' property is the bearer token.
 
         Note the "expires_in" property; if you're planning on making a larger integration, you will
