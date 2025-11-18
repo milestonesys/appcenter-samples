@@ -15,7 +15,7 @@ def get_token_secret(
         integration to maintain logged-in state
     :param clientId: The client ID of an XProtect user with the XProtect Administrators role
     :param clientSecret: The secret of the client logging in
-    :param server: The hostname of the machine hosting the identity provider, e.g. "vms.example.com"
+    :param serverUrl: The hostname of the machine hosting the identity provider, e.g. "vms.example.com"
 
     :returns: session.Response object. The value of the 'access_token' property is the bearer token.
 
