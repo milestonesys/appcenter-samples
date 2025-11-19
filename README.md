@@ -34,6 +34,7 @@ To ensure everything runs smoothly, make sure the following tools are installed 
 * [AIBridge & Prometheus](src/aibridge-prometheus-sample/)
 * [API Gateway Webserver](src/apigateway-webserver-sample/)
 * [RESTful Config API](src/restful-config-api/)
+* [RESTful Events API](src/restful-events-api/)
 
 ## How to run a sample
 This repository is structured in two main directories. 
@@ -50,6 +51,7 @@ appcenter-samples
     ├── hello-world
     ├── postgresql-sample
     ├── restful-config-api
+    ├── restful-events-api
     └── utils
         └── auth.ps1
     ...
