@@ -5,8 +5,8 @@ FROM python:3.10-slim
 WORKDIR /restful-events-api
 
 # Copy project files
-COPY /restful-events-api .
-
+COPY src/. .
+COPY requirements.txt requirements.txt
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
