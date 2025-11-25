@@ -14,7 +14,7 @@ In the following we assume that
 * You have to run the `init` script in the [build/](build/init.sh) directory to get the latest app builder and install any missing dependencies.
 * Remember to add the IP and port of your cluster's sandbox e.g. `10.10.10.10:5000` in the /etc/docker/daemon.json and restart the docker engine. `{"insecure-registries" : [ "10.10.10.10:5000" ]}`
 
-For more infomration, see our [App Center and App Builder documentation](https://download.milestonesys.com/app-builder/Documentation/)
+For more information, see our [App Center and App Builder documentation](https://doc.developer.milestonesys.com/appen/?path=Documentation)
 
 ### Additional dependencies
 To ensure everything runs smoothly, make sure the following tools are installed in the development machine:
@@ -57,7 +57,7 @@ appcenter-samples
     ...
 ```
 
-In the `build` directory, you'll find the `common.mak` file, which defines shared commands for building and managing the samples. Each sample directory includes its own `Makefile` that imports `common.mak` to leverage these commands. Under the hood, `common.mak` uses the App Builder (find more info [here](https://download.milestonesys.com/app-builder/Documentation/App-Builder.pdf)), which provides all the necessary commands to build, push, and install your application.
+In the `build` directory, you'll find the `common.mak` file, which defines shared commands for building and managing the samples. Each sample directory includes its own `Makefile` that imports `common.mak` to leverage these commands. Under the hood, `common.mak` uses the App Builder (find more info [here](https://doc.developer.milestonesys.com/appen/Documentation/App-Builder.pdf)), which provides all the necessary commands to build, push, and install your application.
 
 To work with a sample, navigate to its directory (where the `Makefile` is located) and run `make build` to build the Docker image and Helm chart for that sample.
 

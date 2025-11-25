@@ -10,7 +10,7 @@ for tool in docker kubectl helm curl unzip chmod; do
 done
 
 # Download app-builder.zip
-if curl -L -o appbuilder.zip "https://download.milestonesys.com/app-builder/app-builder.zip"; then
+if curl -L -o appbuilder.zip "https://doc.developer.milestonesys.com/appen/App-Builder/app-builder.zip"; then
     unzip -o appbuilder.zip -d .
     chmod +x app-builder.sh
     rm -f appbuilder.zip
