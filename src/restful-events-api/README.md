@@ -89,16 +89,17 @@ When deployed through App Center, environment variables are automatically config
 
 ```
 restful-events-api/
-├── .env.example                    # Environment variables template, only needed for local development
-├── app-definition.yaml             # App Center configuration
-├── Makefile                        # Build automation
+├── .env.example                     # Environment variables template, only needed for local development
+├── app-definition.yaml              # App Center configuration
+├── Makefile                         # Build automation
 ├── containers/
-│   ├── Dockerfile                  # Container build instructions
 │   └── restful-events-api/
-│       ├── requirements.txt        # Python dependencies
-│       ├── events_rest_api.py      # Main application code
-│       └── identity_provider.py    # Authentication handler
-└── README.md                       # This file
+│       ├── Dockerfile               # Container build instructions
+│       ├── requirements.txt         # Python dependencies
+│       └── src/
+│           ├── events_rest_api.py   # Main application code
+│           └── identity_provider.py # Authentication handler
+└── README.md                        # This file
 ```
 
 ## Porting Existing Python MIP Integration
