@@ -77,60 +77,6 @@ apigateway/
 - **App Center Client Credentials flow**: Request client secret to access to other services in the system.
 - **Easy Deployment**: Quickly deployable using Helm charts.
 
-## Requirements
-
-Since the sample app uses the client credentials flow, the app center on installation will generate a client secret. The app center won't be able to generate the secret unless it is authorized. That means the user must be an administrator and logged in to the management client. The installation must be done through the Management client UI for the app center. 
-
-To avoid using the UI and for development environment only. We provide you with a script which will acquire two tokens for two different users. One is for the username/password that you enter while installing the App Center. The other one is for the Windows user you are logged in with. So, the script must run in a session where you are already logged in as a Windows administrator. This last part is only needed because the Client Credentials Flow registration currently cannot be authorized by an XProtect basic user. The script will copy to your clipboard two kubectl commands to create k8s secrets with the tokens. The App Center will detect these secrets and use them to generate the Client secret. Hosting the windows user tokens as a k8s secrets is a workaround, so you can operate with the app center without being logged-in to the management client (This option is only needed for development environment and not recommended for production environments).
-
-```powershell
-$ErrorActionPreference = "Stop"
-
-Try {
-    $Server = Read-Host -Prompt 'Input hostname of Management Server'
-    $User = Read-Host -Prompt 'Input username of basic user in the administrator role'
-    $Pass = Read-Host -MaskInput -Prompt 'Input password of basic user'
-
-    $Endpoint = "https://" + $Server + ":/IDP/connect/token"
-
-    $Response = Invoke-WebRequest -AllowUnencryptedAuthentication -Uri $Endpoint -Method Post -Body @{
-        grant_type = "password"
-        username = $User
-        password = $Pass
-        client_id = "GrantValidatorClient"
-    }
-    $BUF_AccessToken = ($Response.Content | ConvertFrom-Json).access_token
-
-    $Response = Invoke-WebRequest -AllowUnencryptedAuthentication -Uri $Endpoint -Method Post -Body @{
-        grant_type = "windows_auth"
-        scope = "write:client"
-        client_id = "winauthclient"
-    } -UseDefaultCredentials
-    $CCF_AccessToken = ($Response.Content | ConvertFrom-Json).access_token
-
-    Set-Clipboard ""
-    Set-Clipboard -Append -Value "kubectl create secret generic app-registration-buf-token --from-literal='token=$BUF_AccessToken' --dry-run=client -o yaml | kubectl apply -f -"
-    Set-Clipboard -Append -Value "kubectl create secret generic app-registration-ccf-token --from-literal='token=$CCF_AccessToken' --dry-run=client -o yaml | kubectl apply -f -"
-
-    Write-Output "Your clipboard now contains the commands for creating the secrets necessary for using the basic user flow and client credentials flow"
-}
-Catch {
-    Write-Output $_.Exception
-}
-
-Write-Host "Press any key to continue"
-$void = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-```
-
-Expected output:
-
-```bash
-kubectl create secret generic app-registration-buf-token --from-literal='token=eyJhbGc...' --dry-run=client -o yaml | kubectl apply -f -
-kubectl create secret generic app-registration-ccf-token --from-literal='token=eyJhbGc...' --dry-run=client -o yaml | kubectl apply -f -
-```
-
-Note: The generated token has an expiration period of 3600 seconds. If this level of authorization is needed after this period of time. 
-
 ## The App sandbox
 
 With the App sandbox developer option enabled, the system will host both a *container registry* and a *helm-charts repository*. These come in handy when you want to run and test your App in a system while still keeping everything local. You can push container images to the sandbox registry by prefixing them with `<system-ip>:5000/sandbox.io/`. These images can be pulled from any helm-charts that is installed in the system. Thus, you can now refer to sandbox container images from your local helm-charts and install it directly with the *helm* command.
@@ -270,7 +216,7 @@ The first will install the chart directly from the helm-charts file you built lo
 
 The second will install the chart from the sandbox repository; so basically the same as what would happen if you install the App from the App Center. For this to work, you of course have to push the chart first, like we did with the command `make push-chart`.
 
-To verify that the apigateway-sample App is running, navigate your browser to `https://<system-ip>/apigateway-sample-webserver/`. You will see at first a login page, where you can shows to whether use the ClientCredentialsFlow or a normal login using a basic user. Check the [Using Authentication](#using-authentication) section.
+To verify that the apigateway-sample App is running, navigate your browser to `https://<system-ip>/api/samples/apigateway-sample-webserver/`. You will see at first a login page, where you can shows to whether use the ClientCredentialsFlow or a normal login using a basic user. Check the [Using Authentication](#using-authentication) section.
 
 There is one final target available named `uninstall-chart` which can be quite helpful. It does what it says; it simply uninstalls the apigateway-sample chart from the system.
 
@@ -298,21 +244,9 @@ app-registration:
 
 When this values are specified in the `values.yaml` file. The App Center, will create a client secret that the app integration can use. The secret will be available through a secret in K8s that will be created at the same namespace for the integrating app. The secret name will be as specified in the values above `app-client`.
 
-One way of consuming this secret would be as demoed in this sample by converting it to a volume and mounting it to the container that needs to use the client ID and secret. Also, feel free to use the following guide from Kubernetes - [Define container environment variables using Secret data](https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/#define-container-environment-variables-using-secret-data) - to mount the secrets as environment variables. 
+The recommended way of consuming this secret is as demoed in this sample by reading the two environment variables, `CCF_CLIENT_ID` and `CCF_CLIENT_SECRET`. 
 
-```yaml
-      volumes:
-      - name: app-client
-        secret:
-          secretName: app-client
-```
-
-The service mounted with the app-client volume will have available the following filles mounted to `/etc/app-client/` directory.
-
-The file `/etc/app-client/client-id` with the client id provided previously "09da6440-e308-31a0-963e-1af823e76a33".
-The file `/etc/app-client/client-secret` with the generated secret.
-
-The service with access to this credentials can now ask the IDP for an access token with the given scope. This token will allow this app to connect with tha Api Gateway and access to its endpoints.
+The service with access to this credentials can now ask the IDP for an access token with the given scope. This token will allow this app to connect with the Api Gateway and access to its endpoints.
 
 This sample code provides an example implementation in golang of an http client using the IDP endpoints. Explore the following code for more information [idpclient.go](./containers/apigateway-sample/webserver/apigateway-webserver/src/pkg/repositories/idpclient.go).
 
@@ -401,7 +335,3 @@ To test the websocket functionality. Once the session is open. In the management
 And we can see the test events bieng listed in the app events view.
 
 ![SendTestEvent](./img/events_page_events_table.png)
-
-### Next
-
-- Cameras settings page (TO BE Implemented) integrating with the app center app settings page
