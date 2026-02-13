@@ -7,7 +7,7 @@ import (
 	"apigateway-webserver/src/pkg/constants/enums"
 )
 
-func ReadCredentialsFlowFiles(username, password string, flowType enums.CredentialsFlowType) (string, string, error) {
+func ReadCredentialsFromEnv(username, password string, flowType enums.CredentialsFlowType) (string, string, error) {
 	if flowType == enums.ClientCredentialsFlow {
 		// For credentials to be available for the app the clientCredentialsFlow must be defined in app-definition.yaml like this:
 		//

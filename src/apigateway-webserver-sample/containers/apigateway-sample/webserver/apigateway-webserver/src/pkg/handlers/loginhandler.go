@@ -69,7 +69,7 @@ func (lh *LoginHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username, password, err := appcenter.ReadCredentialsFlowFiles(data.Username, data.Password, credentialsFlowType)
+	username, password, err := appcenter.ReadCredentialsFromEnv(data.Username, data.Password, credentialsFlowType)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Couldn't read the credentials files: %v", err), http.StatusInternalServerError)
 		return
