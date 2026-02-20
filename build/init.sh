@@ -12,7 +12,7 @@ done
 # Download app-builder.zip
 if curl -L -o appbuilder.zip "https://doc.developer.milestonesys.com/appen/App-Builder/app-builder.zip"; then
     unzip -o appbuilder.zip -d .
-    chmod +x app-builder.sh
+    chmod +x app-builder/app-builder.sh
     rm -f appbuilder.zip
     echo "Initialization complete."
 else
