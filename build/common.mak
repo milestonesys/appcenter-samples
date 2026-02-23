@@ -1,7 +1,7 @@
 
 APP_DEFINITION := app-definition.yaml
 CUSTOM_DEFINITION := custom-definition
-APP_BUILDER := $(dir $(lastword $(MAKEFILE_LIST)))app-builder.sh
+APP_BUILDER := $(dir $(lastword $(MAKEFILE_LIST)))app-builder/app-builder.sh
 
 # Check if custom definition exists
 ifeq ($(shell test -d $(CUSTOM_DEFINITION) && echo yes), yes)
