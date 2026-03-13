@@ -1,7 +1,19 @@
 name: "hello-world-app"
 realm: "samples"
-version: 1.0.0
+version: 1.0.17
 description: "An App that exposes an endpoint at /hello-world"
+
+readme: |
+  ## Hello World App
+
+  This is a sample App that exposes an endpoint at [https://cluster-ip/api/samples/hello-world](https://cluster-ip/api/samples/hello-world). 
+  It is used to demonstrate how to create an App using the App Definition format.
+
+changelog: |
+  ## [1.0.17] - 2026-03-13
+
+  ### Added
+  - Added readme and changelog.
 
 prerequisites:
   systemVersion: ">=0.3.10"
@@ -20,4 +32,4 @@ services:
 
   containers:
   - name: hello-world-container
-    image: sandbox.io/hello-world:1.0.0
+    image: sandbox.io/hello-world:1.0.17
