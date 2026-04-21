@@ -46,15 +46,10 @@ Once the helm chart of an App is pushed to the sandbox repository, it will becom
 In the `dotnet-sample` directory you will find a `Makefile` that makes it easy to build and publish the container images and helm charts of the sample. Everything published using the `Makefile` will be to the App sandbox running inside the system.
 
 ```make
-IMAGES = dotnet-sample/webserver_v0.0.1
-CHARTS = dotnet-sample_v0.1.4
-
 include ../build/common.mak
 ```
 
 The [`Makefile`](./Makefile) located at this same directory provides an convenient way to build and publish both the images and the helm-charts of the sample. Everything published using the `Makefile` will be to the App sandbox running inside the system.
-
-The `Makefile` defines two macros listing respectively the container images and the helm charts to handle.
 
 The last line of the `Makefile` includes the `common.mak` file, which defines a set of useful rules by using the **App Builder** in the background. The most important *targets* defined by these rules are:
 
@@ -174,16 +169,14 @@ The first will install the chart directly from the helm chart file you built loc
 
 The second will install the chart from the sandbox repository; so basically the same as what would happen if you install the App from the App Center. For this to work, you of course have to push the chart first, like we did with the command `make push-chart`.
 
-To verify that the dotnet-sample App is running, navigate your browser to `https://<system-ip>/dotnet-sample`. This this show the simple hello world message.
-
 There is one final target available named `uninstall-chart` which can be quite helpful. It does what it says; it simply uninstalls the dotnet-sample chart from the system.
 
 <br>
 
 ### HTTP route and API Base Path
 
-The base path for this sample is `dotnet-sample/`. <br>
-In the `httproute.yaml`, requests with the path prefix `/dotnet-sample/` are routed to the dotnet-sample service, and the `/dotnet-sample` prefix is removed.
+The base path for this sample is `/api/samples/dotnet-sample`. <br>
+In the `httproute.yaml`, requests with the path prefix `/api/samples/dotnet-sample/` are routed to the dotnet-sample service, and the `/api/samples/dotnet-sample` prefix is removed.
 
 ### API Endpoints
 
@@ -194,30 +187,42 @@ In the `httproute.yaml`, requests with the path prefix `/dotnet-sample/` are rou
 
 ### Swagger UI
 
-Swagger UI is available at `/swagger` for development and `/dotnet-sample/swagger` for production.
+Swagger UI is available at `/swagger` for development and `/api/samples/dotnet-sample/swagger` for production (cluster deployment).
 
 ### Example Requests
 
 #### Get All Items
 
 ```sh
+# locally
 curl -X GET http://0.0.0.0:80/dotnet-sample/items
+# or in cluster deployment 
+curl -X GET https://<system-ip>/api/samples/dotnet-sample/items
 ```
 
 #### Add a New Item
 
 ```sh
+# locally
 curl -X POST http://0.0.0.0:80/dotnet-sample/items -H "Content-Type: application/json" -d '{"key": "exampleKey", "value": "exampleValue"}'
+# or in cluster deployment 
+curl -X POST http://<system-ip>/api/samples/dotnet-sample/items -H "Content-Type: application/json" -d '{"key": "exampleKey", "value": "exampleValue"}'
 ```
 
 #### Update an Item
 
 ```sh
+# locally
 curl -X PUT http://0.0.0.0:80/items/dotnet-sample/exampleKey -H "Content-Type: application/json" -d '{"value": "newValue"}'
+# or in cluster deployment 
+curl -X POST http://<system-ip>/api/samples/dotnet-sample/exampleKey -H "Content-Type: application/json" -d '{"value": "newValue"}'
 ```
 
 #### Delete an Item
 
 ```sh
+# locally
 curl -X DELETE http://0.0.0.0:80/dotnet-sample/items/exampleKey
+# or in cluster deployment 
+curl -X DELETE http://<system-ip>/api/samples/dotnet-sample/exampleKey
 ```
