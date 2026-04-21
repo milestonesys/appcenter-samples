@@ -124,4 +124,34 @@ This sample was ported from the existing protocol integration sample [RestfulCom
    - Reference: [Streamlit Docker deployment guide](https://docs.streamlit.io/deploy/tutorials/docker)
 
 5. **Deploy to App Center:**
-   - Once container testing is successful, you can build, push, and install your application in the App Center
+   - Once container testing is successful, you can build, push, and install your application in the App Center, see details below.
+
+
+### Building and Deploying to App Center
+
+To build, push, and install the application:
+
+```bash
+cd src/restful-config-api
+# Login is only required once to connect to the cluster
+make login
+# Build both the image and Helm chart
+make build
+# Push to the sandbox registry and repository
+make push
+# Install the application (equivalent to the install button in App Center UI)
+make install-from-repo
+```
+
+### Verifying Deployment
+
+After deployment, verify that the application is running:
+
+```bash
+# List installed applications
+make list
+# View application events
+make events
+```
+
+The application will be accessible at `http://10.10.16.69/api/samples/restful-config-api/`.
