@@ -330,4 +330,50 @@ This URL points to the Grafana dashboard:
 - `aeiyyzfkfzapsa` is the UID of the dashboard (found in the exported JSON).
 - See the manifest YAML that registers the URL [here](./custom-definition/templates/pre-install_register-app.yaml).
 
----
+## Appendix
+PowerShell script to enable installing Processing Server via CLI. The script will fetch two tokens from IDP and store them as Kubernetes Secrets. The generated token expires after 3600 seconds. If you need authorization after this period, repeat the process.
+
+```powershell
+$ErrorActionPreference = "Stop"
+
+Try {
+    $Server = Read-Host -Prompt 'Input hostname of Management Server'
+    $User = Read-Host -Prompt 'Input username of basic user in the administrator role'
+    $Pass = Read-Host -MaskInput -Prompt 'Input password of basic user'
+
+    $Endpoint = "https://$Server:/IDP/connect/token"
+
+    $Response = Invoke-WebRequest -AllowUnencryptedAuthentication -Uri $Endpoint -Method Post -Body @{
+        grant_type = "password"
+        username = $User
+        password = $Pass
+        client_id = "GrantValidatorClient"
+    }
+    $BUF_AccessToken = ($Response.Content | ConvertFrom-Json).access_token
+
+    $Response = Invoke-WebRequest -AllowUnencryptedAuthentication -Uri $Endpoint -Method Post -Body @{
+        grant_type = "windows_auth"
+        scope = "write:client"
+        client_id = "winauthclient"
+    } -UseDefaultCredentials
+    $CCF_AccessToken = ($Response.Content | ConvertFrom-Json).access_token
+
+    Set-Clipboard ""
+    Set-Clipboard -Append -Value "kubectl create secret generic app-registration-buf-token --from-literal='token=$BUF_AccessToken' --dry-run=client -o yaml | kubectl apply -f -"
+    Set-Clipboard -Append -Value "kubectl create secret generic app-registration-ccf-token --from-literal='token=$CCF_AccessToken' --dry-run=client -o yaml | kubectl apply -f -"
+
+    Write-Output "Your clipboard now contains the commands for creating the secrets necessary for using the basic user flow and client credentials flow"
+}
+Catch {
+    Write-Output $_.Exception
+}
+
+Write-Host "Press any key to continue"
+$void = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+```
+
+**Expected output:**
+```bash
+kubectl create secret generic app-registration-buf-token --from-literal='token=eyJhbGc...' --dry-run=client -o yaml | kubectl apply -f -
+kubectl create secret generic app-registration-ccf-token --from-literal='token=eyJhbGc...' --dry-run=client -o yaml | kubectl apply -f -
+```
