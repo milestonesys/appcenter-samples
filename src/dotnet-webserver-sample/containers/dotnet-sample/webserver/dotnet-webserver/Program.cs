@@ -38,7 +38,7 @@ app.UseSwaggerUI(options =>
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "Key-Value Store API v1");
     } else {
         Console.WriteLine("Swagger UI in production mode");
-        options.SwaggerEndpoint("/dotnet-sample/swagger/v1/swagger.json", "Key-Value Store API v1");
+        options.SwaggerEndpoint("/api/samples/dotnet-sample/swagger/v1/swagger.json", "Key-Value Store API v1");
         options.RoutePrefix = "swagger"; // Set Swagger UI at /swagger
     }
 });
