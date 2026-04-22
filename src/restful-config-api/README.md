@@ -154,4 +154,4 @@ make list
 make events
 ```
 
-The application will be accessible at `http://10.10.16.69/api/samples/restful-config-api/`.
+The application will be accessible at `http://<system-ip>/api/samples/restful-config-api/`.
