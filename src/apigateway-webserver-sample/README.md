@@ -108,7 +108,7 @@ make uninstall-chart
 ```
 
 #### From the Docker view
-So, to build the sample, you must navigate your terminal to the directory of the `Makefile` and then run the command
+So, to build the sample, you must navigate your terminal to the root directory of the sample app (containing the main `Makefile`) and then run the command
 
 ```bash
 make build
@@ -121,7 +121,7 @@ REPOSITORY                                                     TAG       IMAGE I
 <system_ip_addr>:5000/sandbox.io/apigateway-sample/webserver   1.0.0     78f2c9d669b6   6 seconds ago   11.8MB
 ```
 
-Here you can see that the image is named in accordance with the sandbox container registry hosted inside the system. Also you can see that the image is tagged with version `1.0.0` which is the version used in the `Makefile` (the version used in the `IMAGES` macro).
+Here you can see that the image is named in accordance with the sandbox container registry hosted inside the system.
 
 If you are curious what happens behind the scene when running `make build`, then you can add the `-n` command line parameter. This will instruct `make` to not build the image, but instead just show the commands that it would have executed in order to do the build. For the above case you should see output similar to this when running `make -n build`
 
@@ -203,7 +203,7 @@ generated: "2025-03-10T13:47:38Z"
 serverInfo: {}
 ```
 
-At this point the App should be visible in the App Center and you can install / upgrade and uninstall it from here.
+At this point the App should be visible (it takes up to 5 minutes to show up) in the App Center and you can install / upgrade and uninstall it from here.
 
 As an alternative you can also install the App directly from the terminal. There are two targets available
 
@@ -212,9 +212,7 @@ make install-chart-from-file
 make install-chart-from-repo
 ```
 
-The first will install the chart directly from the helm-charts file you built locally. In the above case, it would install the chart from the file named `apigateway-sample-1.0.0.tgz` in the `helm-charts` directory.
-
-The second will install the chart from the sandbox repository; so basically the same as what would happen if you install the App from the App Center. For this to work, you of course have to push the chart first, like we did with the command `make push-chart`.
+The first will install the chart directly from the helm-charts file you built locally. In the above case, it would install the chart from the file named `apigateway-sample-1.0.0.tgz`. Since the App uses the Client Credentials flow (check [Using the Client Credentials Flow integrating with the App Center](#using-the-client-credentials-flow-integrating-with-the-app-center)), you need to run a PowerShell script that obtains two tokens from the IDP and saves them as Kubernetes secrets. Find the script [here](../utils/auth.ps1). The second will install the chart from the sandbox repository; so basically the same as what would happen if you install the App from the App Center. For this to work, you of course have to push the chart first, like we did with the command `make push-chart`.
 
 To verify that the apigateway-sample App is running, navigate your browser to `https://<system-ip>/api/samples/apigateway-sample-webserver/`. You will see at first a login page, where you can shows to whether use the ClientCredentialsFlow or a normal login using a basic user. Check the [Using Authentication](#using-authentication) section.
 
