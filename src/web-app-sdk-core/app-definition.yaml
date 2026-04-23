@@ -24,4 +24,4 @@ services:
 
   containers:
   - name: sdk-test-container
-    image: sandbox.io/sdk-test:1.0.0
+    image: sandbox.io/web-app-sdk-core:1.0.0

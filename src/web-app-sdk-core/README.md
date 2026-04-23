@@ -42,3 +42,5 @@ http://<system-ip>/api/samples/sdk-test/
 ```
 
 Replace `<system-ip>` with your actual cluster domain.
+
+## VideoOS Platform SDK Core 
