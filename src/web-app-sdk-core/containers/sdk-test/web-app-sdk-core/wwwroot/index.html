@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoOS Platform SDK Session Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>VideoOS Platform SDK Session Manager</h1>
+
+        <!-- Method 1: Server Configuration Provided -->
+        <div class="method-section">
+            <div class="method-title">1. Create Session with Server Configuration</div>
+            <form id="serverConfigForm">
+                <div class="form-group">
+                    <label for="serverUrl">Server URL:</label>
+                    <input type="url" id="serverUrl" placeholder="https://your-server.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="userType">User Type:</label>
+                    <select id="userType" required>
+                        <option value="">Select user type</option>
+                        <option value="DefaultWindows">Default Windows</option>
+                        <option value="Windows">Windows</option>
+                        <option value="Basic">Basic</option>
+                        <option value="External">External</option>
+                    </select>
+                </div>
+
+                <div class="conditional-fields" id="credentialFields">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" placeholder="Enter username">
+                    </div>
+                    <div class="form-group">
+                        <label for="password" id="passwordLabel">Password:</label>
+                        <input type="password" id="password" placeholder="Enter password">
+                    </div>
+                </div>
+
+                <button type="submit">Create session</button>
+                <div class="loading" id="loading1">Creating session...</div>
+            </form>
+            <div class="result" id="result1"></div>
+        </div>
+
+        <!-- Method 2: Runtime Configuration -->
+        <div class="method-section">
+            <div class="method-title">2. Create session using runtime configuration</div>
+            <form id="runtimeConfigForm">
+                <div class="form-group">
+                    <label for="userTypeRC">User Type:</label>
+                    <select id="userTypeRC" required>
+                        <option value="">Select user type</option>
+                        <option value="DefaultWindows">Default Windows</option>
+                        <option value="Windows">Windows</option>
+                        <option value="Basic">Basic</option>
+                        <option value="External">External</option>
+                    </select>
+                </div>
+
+                <div class="conditional-fields" id="credentialFieldsRC">
+                    <div class="form-group">
+                        <label for="usernameRC">Username:</label>
+                        <input type="text" id="usernameRC" placeholder="Enter username">
+                    </div>
+                    <div class="form-group">
+                        <label for="passwordRC" id="passwordLabelRC">Password:</label>
+                        <input type="password" id="passwordRC" placeholder="Enter password">
+                    </div>
+                </div>
+
+                <button type="submit">Create session</button>
+                <div class="loading" id="loading2">Creating session...</div>
+            </form>
+            <div class="result" id="result2"></div>
+        </div>
+
+        <!-- Method 3: Runtime Configuration with Default User -->
+        <div class="method-section">
+            <div class="method-title">3. Create session using runtime configuration and default user</div>
+            <form id="defaultUserForm">
+                <button type="submit">Create session</button>
+                <div class="loading" id="loading3">Creating session...</div>
+            </form>
+            <div class="result" id="result3"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
