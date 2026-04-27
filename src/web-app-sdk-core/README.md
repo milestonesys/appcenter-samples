@@ -4,17 +4,18 @@ A sample web application that demonstrates how to create sessions using the Vide
 
 ## Overview
 
-This sample is an ASP.NET Core web application with a static frontend. It exposes three API endpoints that create a `Session` using the VideoOS Platform SDK Core, and returns the session ID, server URI, and access token to the browser.
+This sample is an ASP.NET Core web application with a static frontend. It exposes API endpoints for creating a `Session` using the VideoOS Platform SDK Core, querying cameras, and updating camera metadata.
 
-The three session creation methods demonstrated are:
+The implemented endpoints are:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| Server config provided | `POST /api/session/create-with-server-config` | Creates a session with an explicit server URL and credentials |
-| Runtime config | `POST /api/session/create-with-runtime-config` | Creates a session using server config resolved from the App Center runtime environment |
-| Runtime config + default user | `POST /api/session/create-with-runtime-config-default-user` | Creates a session using the runtime config and the default App Center user |
+| GET | `/config` | Returns the VMS server URL assembled from runtime environment variables |
+| POST | `/session/create-with-server-config` | Creates a session with an explicit server URL and credentials |
+| POST | `/cameras` | Returns all cameras visible to the authenticated user |
+| POST | `/cameras/update` | Updates the `Name` and/or `Description` of a single camera |
 
-All three methods support four user types: `DefaultWindows`, `Windows`, `Basic`, and `External` (access token).
+The session creation endpoint supports four user types: `DefaultWindows`, `Windows`, `Basic`, and `External` (access token).
 
 ## Sample Structure
 
