@@ -19,6 +19,7 @@ services:
     targetPort: 8080
     ingress:
       rootPath: "/api/samples/sdk-test"
+      redirectPath: "/"
       rules:
       - path: "/"
 
