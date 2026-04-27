@@ -35,6 +35,7 @@ To ensure everything runs smoothly, make sure the following tools are installed 
 * [API Gateway Webserver](src/apigateway-webserver-sample/)
 * [RESTful Config API](src/restful-config-api/)
 * [RESTful Events API](src/restful-events-api/)
+* [Web App SDK core](src/web-app-sdk-core/)
 
 ## How to run a sample
 This repository is structured in two main directories. 
@@ -49,9 +50,7 @@ appcenter-samples
     ├── apigateway-webserver-sample
     ├── dotnet-webserver-sample
     ├── hello-world
-    ├── postgresql-sample
-    ├── restful-config-api
-    ├── restful-events-api
+    ├── ...
     └── utils
         └── auth.ps1
     ...
