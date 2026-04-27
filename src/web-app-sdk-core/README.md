@@ -29,9 +29,7 @@ web-app-sdk-core/
             ├── SessionHelper.cs           # SDK session creation logic
             ├── TestWebApp.csproj
             └── wwwroot/
-                ├── index.html             # Session Manager UI
-                ├── app.js                 # Frontend form handling and API calls
-                └── styles.css
+                └── index.html             # Session Manager UI
 ```
 
 ## How to Build and Deploy
@@ -68,4 +66,18 @@ http://<system-ip>/api/samples/sdk-test/
 
 Replace `<system-ip>` with your actual cluster domain.
 
-## VideoOS Platform SDK Core
+## API Endpoints
+
+This sample demonstrates how to use the VideoOS Platform SDK Core in a containerized application. It provides a simple browser UI and four endpoints covering session creation, configuration queries, and camera updates.
+
+### `GET /config`
+Returns the VMS server URL assembled from the `LEGACY_MANAGEMENT_SERVER` and `LEGACY_USE_TLS` runtime environment variables. Used by the UI to pre-fill the server URL on load.
+
+### `POST /session/create-with-server-config`
+Creates an SDK session with the supplied credentials and returns the session ID, server URI, and access token. Useful for verifying connectivity before performing other operations.
+
+### `POST /cameras`
+Returns all cameras visible to the authenticated user. Uses `ConfigurationService.Get<Camera>()` to query the VMS configuration.
+
+### `POST /cameras/update`
+Updates the `Name` and/or `Description` of a single camera identified by its ID. Uses a `Filter` query to fetch the specific camera and calls `camera.Save()` to persist the changes. Fields omitted from the request are left unchanged (partial update).
