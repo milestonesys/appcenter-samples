@@ -2,8 +2,16 @@ using VideoOS.Platform.SDK.Core;
 
 namespace TestWebApp;
 
+/// <summary>
+/// Helpers for creating an SDK <see cref="Session"/> and waiting for its OAuth token.
+/// Each HTTP request creates its own Session, there is no shared server-side session state.
+/// </summary>
 public class SessionHelper
 {
+    /// <summary>
+    /// Creates a <see cref="Session"/> with an explicit server URL and credentials.
+    /// Supported user types: DefaultWindows, Windows, Basic, External.
+    /// </summary>
     public static Session CreateSessionWithServerConfigurationProvided(IServiceProvider serviceProvider, string serverUrl, string userType, string? username = null, string? password = null)
     {
         var serverUri = new Uri(serverUrl);
@@ -19,6 +27,9 @@ public class SessionHelper
         };
     }
 
+    /// <summary>
+    /// Waits until the SDK has acquired an OAuth token for the session.
+    /// </summary>
     public static async Task<string> WaitForTokenAsync(Session session, int timeoutSeconds = 30)
     {
         var existing = session.MipTokenCache.Token;
