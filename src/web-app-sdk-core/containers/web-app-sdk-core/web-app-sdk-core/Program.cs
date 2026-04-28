@@ -9,9 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMipServices();
 var app = builder.Build();
 
+// Serve wwwroot/index.html as the default page for the browser UI.
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
+// Returns the VMS server URL assembled from runtime environment variables injected by App Center.
 app.MapGet("/config", () =>
 {
     var mgmtServer = Environment.GetEnvironmentVariable("LEGACY_MANAGEMENT_SERVER");
@@ -25,6 +27,8 @@ app.MapGet("/config", () =>
     return Results.Ok(new ConfigResponse(serverUrl));
 });
 
+// Creates a session and returns the access token.
+// Useful for verifying that credentials and server connectivity are correct before performing other operations.
 app.MapPost("/session/create-with-server-config", async (SessionRequest request, IServiceProvider serviceProvider) =>
 {
     try
@@ -42,6 +46,8 @@ app.MapPost("/session/create-with-server-config", async (SessionRequest request,
     }
 });
 
+// Returns all cameras visible to the authenticated user.
+// ConfigurationService.Get<Camera>() queries the VMS configuration for all Camera items.
 app.MapPost("/cameras", async (SessionRequest request, IServiceProvider serviceProvider) =>
 {
     try
@@ -61,6 +67,8 @@ app.MapPost("/cameras", async (SessionRequest request, IServiceProvider serviceP
     }
 });
 
+// Updates the Name and/or Description of a single camera.
+// Demonstrates the Filter pattern for fetching a specific item by ID, and camera.Save() for persisting changes.
 app.MapPost("/cameras/update", async (CameraUpdateRequest request, IServiceProvider serviceProvider) =>
 {
     try
@@ -71,6 +79,8 @@ app.MapPost("/cameras/update", async (CameraUpdateRequest request, IServiceProvi
         await SessionHelper.WaitForTokenAsync(session);
 
         var configuration = new ConfigurationService(session);
+
+        // Use a Filter to fetch only the target camera rather than loading all cameras.
         var cameras = await configuration.Get<Camera>(
             [new Filter { Field = "Id", Value = request.CameraId, Operator = FilterOperator.Equal }]);
 
@@ -80,6 +90,7 @@ app.MapPost("/cameras/update", async (CameraUpdateRequest request, IServiceProvi
         if (request.Name is not null) camera.Name = request.Name;
         if (request.Description is not null) camera.Description = request.Description;
 
+        // Save() persists the changes back to the VMS.
         await camera.Save();
 
         return Results.Ok(new CameraResponse(camera.Id.ToString(), camera.Name ?? string.Empty, camera.Description ?? string.Empty));
