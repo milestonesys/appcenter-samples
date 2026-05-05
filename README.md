@@ -48,8 +48,6 @@ appcenter-samples
 └── src
     ├── aibridge-prometheus-sample
     ├── apigateway-webserver-sample
-    ├── dotnet-webserver-sample
-    ├── hello-world
     ├── ...
     └── utils
         └── auth.ps1
