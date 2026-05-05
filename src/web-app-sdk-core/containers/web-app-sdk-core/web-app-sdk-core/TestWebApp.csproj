@@ -7,8 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- TODO: change refeerence -->
-    <PackageReference Include="VideoOS.Platform.SDK.Core" Version="1.0.0" />
+    <PackageReference Include="MilestoneSystems.VideoOS.Platform.SDK.Core" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
