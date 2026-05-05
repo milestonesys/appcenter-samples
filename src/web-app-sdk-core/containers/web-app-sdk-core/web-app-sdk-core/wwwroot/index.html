@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VMS SDK Core Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header svg { flex-shrink: 0; }
+    header h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: 0.02em; }
+    header span { font-size: 0.8rem; opacity: 0.55; margin-left: 8px; }
+
+    /* ── connection bar ── */
+    .conn-bar {
+      background: #1e293b;
+      padding: 14px 32px;
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .conn-bar .conn-field { display: flex; flex-direction: column; gap: 4px; }
+    .conn-bar .conn-field.grow { flex: 1; min-width: 200px; }
+    .conn-bar .conn-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+    .conn-bar input, .conn-bar select {
+      padding: 7px 10px;
+      border: 1.5px solid #334155;
+      border-radius: 7px;
+      font-size: 0.88rem;
+      background: #0f172a;
+      color: #e2e8f0;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    .conn-bar input::placeholder { color: #475569; }
+    .conn-bar input:focus, .conn-bar select:focus { border-color: #3b82f6; }
+    .conn-bar select option { background: #1e293b; }
+
+    .conn-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: #94a3b8;
+      padding-bottom: 2px;
+      white-space: nowrap;
+    }
+    .conn-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #475569;
+      transition: background 0.3s;
+    }
+    .conn-dot.ok  { background: #22c55e; }
+    .conn-dot.err { background: #ef4444; }
+
+    .btn-test {
+      padding: 7px 14px;
+      background: #334155;
+      color: #cbd5e1;
+      border: 1.5px solid #475569;
+      border-radius: 7px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .btn-test:hover { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+
+    main {
+      max-width: 900px;
+      margin: 28px auto;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-header .badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 2px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+    .badge-post { background: #dbeafe; color: #1d4ed8; }
+
+    .card-header h2 { font-size: 1rem; font-weight: 600; }
+    .card-header .endpoint { font-size: 0.8rem; color: #94a3b8; margin-left: auto; font-family: monospace; }
+
+    .card-body { padding: 20px 24px; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .form-grid .full { grid-column: 1 / -1; }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+      background: #fafafa;
+    }
+    input:focus, select:focus { border-color: #3b82f6; background: #fff; }
+
+    button {
+      padding: 10px 22px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #2563eb; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover:not(:disabled) { background: #dc2626; }
+
+    .actions { margin-top: 16px; display: flex; gap: 10px; align-items: center; }
+
+    .status {
+      font-size: 0.82rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .status.loading { background: #fef3c7; color: #92400e; }
+    .status.ok      { background: #d1fae5; color: #065f46; }
+    .status.err     { background: #fee2e2; color: #991b1b; }
+
+    .result {
+      margin-top: 16px;
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 0.8rem;
+      font-family: "JetBrains Mono", "Fira Code", monospace;
+      white-space: pre-wrap;
+      max-height: 260px;
+      overflow-y: auto;
+      display: none;
+    }
+    .result.visible { display: block; }
+
+    /* Camera table */
+    .table-wrap { overflow-x: auto; margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th { text-align: left; padding: 8px 12px; background: #f8f8f8; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: #666; border-bottom: 1.5px solid #eee; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafbff; }
+    .use-btn { padding: 4px 12px; font-size: 0.78rem; background: #ede9fe; color: #5b21b6; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+    .use-btn:hover { background: #ddd6fe; }
+    .empty-state { text-align: center; color: #aaa; padding: 24px 0; font-size: 0.9rem; }
+
+    .divider { height: 1px; background: #f0f0f0; margin: 16px 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="28" height="28" rx="6" fill="#3b82f6"/>
+    <circle cx="11" cy="14" r="5" stroke="white" stroke-width="2"/>
+    <path d="M16 11l6-3v12l-6-3" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+  </svg>
+  <h1>VMS SDK Core Demo <span>VideoOS.Platform.SDK.Core</span></h1>
+</header>
+
+<!-- ── Connection bar ── -->
+<div class="conn-bar">
+  <div class="conn-field grow">
+    <label class="conn-label">Server URL</label>
+    <input id="s-serverUrl" type="text" placeholder="http://your-vms-server" />
+  </div>
+  <div class="conn-field">
+    <label class="conn-label">User Type</label>
+    <select id="s-userType" onchange="onUserTypeChange()">
+      <option value="Basic">Basic</option>
+      <option value="Windows">Windows</option>
+      <option value="DefaultWindows">DefaultWindows</option>
+      <option value="External">External</option>
+    </select>
+  </div>
+  <div class="conn-field" id="f-username">
+    <label class="conn-label">Username</label>
+    <input id="s-username" type="text" placeholder="admin" />
+  </div>
+  <div class="conn-field" id="f-password">
+    <label class="conn-label">Password</label>
+    <input id="s-password" type="password" placeholder="••••••••" />
+  </div>
+  <div class="conn-field">
+    <div class="conn-indicator">
+      <div class="conn-dot" id="conn-dot"></div>
+      <span id="conn-label">not tested</span>
+    </div>
+    <button class="btn-test" onclick="testConnection()">Test Connection</button>
+  </div>
+</div>
+
+<main>
+
+  <!-- LIST CAMERAS -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-post">POST</span>
+      <h2>List Cameras</h2>
+      <span class="endpoint">/cameras</span>
+    </div>
+    <div class="card-body">
+      <div class="actions" style="margin-top:0">
+        <button class="btn-primary" onclick="listCameras()">Fetch Cameras</button>
+        <span id="c-status" class="status" style="display:none"></span>
+      </div>
+      <div id="c-table" class="table-wrap" style="display:none">
+        <table>
+          <thead><tr><th>Name</th><th>Description</th><th>ID</th><th></th></tr></thead>
+          <tbody id="c-tbody"></tbody>
+        </table>
+      </div>
+      <div id="c-empty" class="empty-state" style="display:none">No cameras found.</div>
+    </div>
+  </div>
+
+  <!-- UPDATE CAMERA -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge badge-post">POST</span>
+      <h2>Update Camera</h2>
+      <span class="endpoint">/cameras/update</span>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="full">
+          <label>Camera ID</label>
+          <input id="u-cameraId" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+        </div>
+        <div>
+          <label>New Name <span style="font-weight:400;color:#aaa">(optional)</span></label>
+          <input id="u-name" type="text" placeholder="Leave blank to keep current" />
+        </div>
+        <div>
+          <label>New Description <span style="font-weight:400;color:#aaa">(optional)</span></label>
+          <input id="u-description" type="text" placeholder="Leave blank to keep current" />
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-primary" onclick="updateCamera()">Save Changes</button>
+        <button class="btn-danger" style="background:#f3f4f6;color:#555" onclick="clearUpdate()">Clear</button>
+        <span id="u-status" class="status" style="display:none"></span>
+      </div>
+      <pre id="u-result" class="result"></pre>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // Derive base path from the current page URL so relative API calls work
+  // behind any reverse-proxy prefix (e.g. /api/samples/sdk-test/).
+  const BASE = window.location.pathname.replace(/\/[^/]*$/, '');
+
+  function onUserTypeChange() {
+    const isDefault = document.getElementById('s-userType').value === 'DefaultWindows';
+    document.getElementById('f-username').style.display = isDefault ? 'none' : '';
+    document.getElementById('f-password').style.display  = isDefault ? 'none' : '';
+  }
+
+  // ── test connection ───────────────────────────────────────────────────────
+  async function testConnection() {
+    const dot = document.getElementById('conn-dot');
+    const lbl = document.getElementById('conn-label');
+    const creds = validateCredentials('_conn');
+    if (!creds) {
+      dot.className = 'conn-dot err';
+      lbl.textContent = 'missing fields';
+      return;
+    }
+    dot.className = 'conn-dot';
+    lbl.textContent = 'testing…';
+    try {
+      await post(`${BASE}/session/create-with-server-config`, creds);
+      dot.className = 'conn-dot ok';
+      lbl.textContent = 'connected';
+    } catch (e) {
+      dot.className = 'conn-dot err';
+      lbl.textContent = e.message.length > 40 ? e.message.slice(0, 40) + '…' : e.message;
+    }
+  }
+
+  // ── helpers ──────────────────────────────────────────────────────────────
+  function credentials() {
+    return {
+      serverUrl: document.getElementById('s-serverUrl').value.trim(),
+      userType:  document.getElementById('s-userType').value,
+      username:  document.getElementById('s-username').value.trim() || null,
+      password:  document.getElementById('s-password').value || null,
+    };
+  }
+
+  function setStatus(prefix, state, text) {
+    if (prefix === '_conn') return; // connection feedback goes to conn-bar only
+    const el = document.getElementById(`${prefix}-status`);
+    el.className = `status ${state}`;
+    el.textContent = text;
+    el.style.display = 'inline-block';
+  }
+
+  function showResult(prefix, data) {
+    const el = document.getElementById(`${prefix}-result`);
+    el.textContent = JSON.stringify(data, null, 2);
+    el.classList.add('visible');
+  }
+
+  async function post(url, body) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error ?? JSON.stringify(json));
+    return json;
+  }
+
+  function validateCredentials(prefix) {
+    const creds = credentials();
+    if (!creds.serverUrl) { setStatus(prefix, 'err', 'Server URL is required'); return null; }
+    if (creds.userType !== 'DefaultWindows') {
+      if (!creds.username) { setStatus(prefix, 'err', 'Username is required'); return null; }
+      if (!creds.password) { setStatus(prefix, 'err', 'Password is required'); return null; }
+    }
+    return creds;
+  }
+
+  // ── list cameras ──────────────────────────────────────────────────────────
+  async function listCameras() {
+    const creds = validateCredentials('c');
+    if (!creds) return;
+    setStatus('c', 'loading', 'Fetching…');
+    document.getElementById('c-table').style.display = 'none';
+    document.getElementById('c-empty').style.display = 'none';
+    try {
+      const data = await post(`${BASE}/cameras`, creds);
+      setStatus('c', 'ok', `${data.length} camera(s)`);
+      renderCameras(data);
+    } catch (e) {
+      setStatus('c', 'err', e.message);
+    }
+  }
+
+  function renderCameras(cameras) {
+    const tbody = document.getElementById('c-tbody');
+    tbody.innerHTML = '';
+    if (!cameras.length) {
+      document.getElementById('c-empty').style.display = 'block';
+      return;
+    }
+    cameras.forEach(cam => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${esc(cam.name)}</td>
+        <td style="color:#888">${esc(cam.description)}</td>
+        <td style="font-family:monospace;font-size:0.78rem;color:#888">${esc(cam.id)}</td>
+        <td><button class="use-btn" onclick="prefillUpdate('${esc(cam.id)}','${esc(cam.name)}','${esc(cam.description)}')">Use</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+    document.getElementById('c-table').style.display = 'block';
+  }
+
+  // ── update camera ─────────────────────────────────────────────────────────
+  async function updateCamera() {
+    const cameraId = document.getElementById('u-cameraId').value.trim();
+    const name     = document.getElementById('u-name').value.trim() || null;
+    const desc     = document.getElementById('u-description').value.trim() || null;
+
+    if (!cameraId) { setStatus('u', 'err', 'Camera ID is required'); return; }
+    const creds = validateCredentials('u');
+    if (!creds) return;
+
+    setStatus('u', 'loading', 'Saving…');
+    try {
+      const data = await post(`${BASE}/cameras/update`, { ...creds, cameraId, name, description: desc });
+      setStatus('u', 'ok', 'Camera updated');
+      showResult('u', data);
+      listCameras(); // refresh list
+    } catch (e) {
+      setStatus('u', 'err', e.message);
+      showResult('u', { error: e.message });
+    }
+  }
+
+  function prefillUpdate(id, name, description) {
+    document.getElementById('u-cameraId').value = id;
+    document.getElementById('u-name').value = name;
+    document.getElementById('u-description').value = description;
+    document.querySelector('.card:last-child').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function clearUpdate() {
+    ['u-cameraId','u-name','u-description'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('u-status').style.display = 'none';
+    const r = document.getElementById('u-result');
+    r.classList.remove('visible');
+    r.textContent = '';
+  }
+
+  function esc(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  // ── pre-fill server URL from container env vars ───────────────────────────
+  (async () => {
+    try {
+      const res = await fetch(`${BASE}/config`);
+      if (!res.ok) return;
+      const { serverUrl } = await res.json();
+      if (serverUrl) {
+        const input = document.getElementById('s-serverUrl');
+        input.value = serverUrl;
+        input.style.borderColor = '#22c55e';
+      }
+    } catch { /* env vars not set, leave blank */ }
+  })();
+</script>
+</body>
+</html>

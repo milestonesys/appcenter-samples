@@ -1,0 +1,28 @@
+name: "web-app-sdk-core-app"
+realm: "samples"
+version: 1.0.0
+description: "A web app that demonstrates usage of MIP SDK core"
+
+prerequisites:
+  systemVersion: ">=0.3.10"
+
+credentials:
+  clientCredentialsFlow:
+    clientName: "web-app-sdk-core"
+    clientScopes: [ "managementserver" ]
+
+services:
+- name: pub-samples-sdk-test
+  routes:
+  - name: sdk-test-route
+    port: 80
+    targetPort: 8080
+    ingress:
+      rootPath: "/api/samples/sdk-test"
+      redirectPath: "/"
+      rules:
+      - path: "/"
+
+  containers:
+  - name: sdk-test-container
+    image: sandbox.io/web-app-sdk-core:1.0.0
