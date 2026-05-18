@@ -1,6 +1,7 @@
 name: "hello-world-app"
+displayName: "Hello World App"
 realm: "samples"
-version: 1.0.17
+version: 1.0.21
 description: "An App that exposes an endpoint at /hello-world"
 
 readme: |
@@ -10,6 +11,26 @@ readme: |
   It is used to demonstrate how to create an App using the App Definition format.
 
 changelog: |
+  ## [1.0.21] - 2026-05-15
+
+  ### Added
+  - Display name for the app.
+
+  ## [1.0.20] - 2026-03-17
+
+  ### Changed
+  - Something important.
+
+  ## [1.0.19] - 2026-03-16
+
+  ### Added
+  - New section in the readme file.
+
+  ## [1.0.18] - 2026-03-14
+
+  ### Fixed
+  - Minor adjustments and performance optimizations.
+
   ## [1.0.17] - 2026-03-13
 
   ### Added
@@ -32,4 +53,4 @@ services:
 
   containers:
   - name: hello-world-container
-    image: sandbox.io/hello-world:1.0.17
+    image: sandbox.io/hello-world:1.0.21
