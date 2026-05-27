@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"log"
@@ -28,7 +30,7 @@ func mainReturnWithCode() int {
 
 func mainReturnWithError() error {
 	// Get bootstrap server from environment
-	bootstrapServer := os.Getenv("KAFKA_BOOTSTRAP_SERVER")
+	bootstrapServer := os.Getenv("KAFKA_CLUSTER_BOOTSTRAP_SERVER")
 	if bootstrapServer == "" {
 		return errors.New("error getting bootstrap server from environment")
 	}
@@ -37,13 +39,37 @@ func mainReturnWithError() error {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
+	// Load CA cert
+	caCert, err := os.ReadFile("/usr/local/share/ca-certificates/kafka-ca.crt")
+	if err != nil {
+		log.Fatalf("Failed to read CA cert: %v", err)
+	}
+
+	caCertPool := x509.NewCertPool()
+	if !caCertPool.AppendCertsFromPEM(caCert) {
+		log.Fatal("Failed to parse CA certificate")
+	}
+
+	// Load client certificate and key for mTLS
+	clientCertPath := "/opt/kafka/user-certs/user.crt"
+	clientKeyPath := "/opt/kafka/user-certs/user.key"
+	clientCert, err := tls.LoadX509KeyPair(clientCertPath, clientKeyPath)
+	if err != nil {
+		log.Fatalf("Failed to load client certificate/key: %v", err)
+	}
+
 	// Create kafka client
 	topic := "samples.my-topic"
 	cl, err := kgo.NewClient(
 		kgo.SeedBrokers(bootstrapServer),
+		kgo.DialTLSConfig(&tls.Config{
+			RootCAs:      caCertPool,
+			Certificates: []tls.Certificate{clientCert},
+		}),
 		kgo.ConsumeResetOffset(kgo.NewOffset().AtEnd()),
 		kgo.ConsumeStartOffset(kgo.NewOffset().AtEnd()),
 		kgo.ConsumeTopics(topic))
+
 	if err != nil {
 		return err
 	}
