@@ -69,7 +69,6 @@ func mainReturnWithError() error {
 		}),
 	)
 
-	// cl, err := kgo.NewClient(kgo.SeedBrokers(bootstrapServer))
 	if err != nil {
 		return err
 	}
