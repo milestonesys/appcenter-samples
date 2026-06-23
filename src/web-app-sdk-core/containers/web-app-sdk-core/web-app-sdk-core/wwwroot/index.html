@@ -235,10 +235,9 @@
   </div>
   <div class="conn-field">
     <label class="conn-label">User Type</label>
-    <select id="s-userType" onchange="onUserTypeChange()">
+    <select id="s-userType">
       <option value="Basic">Basic</option>
       <option value="Windows">Windows</option>
-      <option value="DefaultWindows">DefaultWindows</option>
       <option value="External">External</option>
     </select>
   </div>
@@ -321,11 +320,7 @@
   // behind any reverse-proxy prefix (e.g. /api/samples/sdk-test/).
   const BASE = window.location.pathname.replace(/\/[^/]*$/, '');
 
-  function onUserTypeChange() {
-    const isDefault = document.getElementById('s-userType').value === 'DefaultWindows';
-    document.getElementById('f-username').style.display = isDefault ? 'none' : '';
-    document.getElementById('f-password').style.display  = isDefault ? 'none' : '';
-  }
+  
 
   // ── test connection ───────────────────────────────────────────────────────
   async function testConnection() {
@@ -387,10 +382,8 @@
   function validateCredentials(prefix) {
     const creds = credentials();
     if (!creds.serverUrl) { setStatus(prefix, 'err', 'Server URL is required'); return null; }
-    if (creds.userType !== 'DefaultWindows') {
-      if (!creds.username) { setStatus(prefix, 'err', 'Username is required'); return null; }
-      if (!creds.password) { setStatus(prefix, 'err', 'Password is required'); return null; }
-    }
+    if (!creds.username) { setStatus(prefix, 'err', 'Username is required'); return null; }
+    if (!creds.password) { setStatus(prefix, 'err', 'Password is required'); return null; } 
     return creds;
   }
 
