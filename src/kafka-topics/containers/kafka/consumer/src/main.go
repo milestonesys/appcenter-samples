@@ -59,7 +59,7 @@ func mainReturnWithError() error {
 	}
 
 	// Create kafka client
-	topic := "samples.my-topic"
+	topic := "app.samples.kafka-app.my-topic"
 	cl, err := kgo.NewClient(
 		kgo.SeedBrokers(bootstrapServer),
 		kgo.DialTLSConfig(&tls.Config{

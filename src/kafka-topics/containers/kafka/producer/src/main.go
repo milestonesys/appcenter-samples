@@ -74,7 +74,7 @@ func mainReturnWithError() error {
 	}
 	defer cl.Close()
 
-	topic := "samples.my-topic"
+	topic := "app.samples.kafka-app.my-topic"
 
 	// Produce messages until told otherwise
 	ctx, cancel := context.WithCancel(context.Background())
