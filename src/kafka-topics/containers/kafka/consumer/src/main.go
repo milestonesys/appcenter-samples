@@ -40,7 +40,7 @@ func mainReturnWithError() error {
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
 	// Load CA cert
-	caCert, err := os.ReadFile("/usr/local/share/ca-certificates/kafka-ca.crt")
+	caCert, err := os.ReadFile("/usr/local/share/ca-certificates/kafka_ca.crt")
 	if err != nil {
 		log.Fatalf("Failed to read CA cert: %v", err)
 	}
