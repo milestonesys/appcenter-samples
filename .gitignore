@@ -65,3 +65,6 @@ ipython_config.py
 venv/
 
 app-builder.*
+
+.vs/
+*.user
