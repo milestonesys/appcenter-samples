@@ -6,11 +6,6 @@ description: "A web app that demonstrates usage of MIP SDK core"
 prerequisites:
   systemVersion: ">=0.3.10"
 
-credentials:
-  clientCredentialsFlow:
-    clientName: "web-app-sdk-core"
-    clientScopes: [ "managementserver" ]
-
 services:
 - name: pub-samples-sdk-test
   routes:

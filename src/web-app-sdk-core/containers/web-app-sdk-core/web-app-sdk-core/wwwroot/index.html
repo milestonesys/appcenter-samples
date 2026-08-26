@@ -214,6 +214,21 @@
     .empty-state { text-align: center; color: #aaa; padding: 24px 0; font-size: 0.9rem; }
 
     .divider { height: 1px; background: #f0f0f0; margin: 16px 0; }
+
+    .btn-stream { background: #0ea5e9; color: #fff; }
+    .btn-stream:hover:not(:disabled) { background: #0284c7; }
+    .btn-stream-stop { background: #f97316; color: #fff; }
+    .btn-stream-stop:hover:not(:disabled) { background: #ea580c; }
+    .stream-label {
+      font-size: 0.82rem;
+      font-family: "JetBrains Mono", "Fira Code", monospace;
+      color: #0369a1;
+      background: #e0f2fe;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: none;
+    }
+    .stream-label.visible { display: inline-block; }
   </style>
 </head>
 <body>
@@ -306,8 +321,12 @@
       </div>
       <div class="actions">
         <button class="btn-primary" onclick="updateCamera()">Save Changes</button>
+        <button id="stream-btn" class="btn-stream" onclick="toggleStream()">Start Stream</button>
         <button class="btn-danger" style="background:#f3f4f6;color:#555" onclick="clearUpdate()">Clear</button>
         <span id="u-status" class="status" style="display:none"></span>
+      </div>
+      <div class="actions" style="margin-top:8px">
+        <span id="stream-label" class="stream-label"></span>
       </div>
       <pre id="u-result" class="result"></pre>
     </div>
@@ -458,6 +477,85 @@
     const r = document.getElementById('u-result');
     r.classList.remove('visible');
     r.textContent = '';
+    const sl = document.getElementById('stream-label');
+    sl.classList.remove('visible');
+    sl.textContent = '';
+    stopStreamPolling();
+    setStreamButtonState(false);
+  }
+
+  // ── stream camera (toggle + 1-second polling) ────────────────────────────
+  let streamPollTimer = null;
+
+  function setStreamButtonState(streaming) {
+    const btn = document.getElementById('stream-btn');
+    if (streaming) {
+      btn.textContent = 'Stop Stream';
+      btn.className = 'btn-stream-stop';
+    } else {
+      btn.textContent = 'Start Stream';
+      btn.className = 'btn-stream';
+    }
+  }
+
+  function stopStreamPolling() {
+    if (streamPollTimer !== null) {
+      clearInterval(streamPollTimer);
+      streamPollTimer = null;
+    }
+  }
+
+  async function toggleStream() {
+    const cameraId = document.getElementById('u-cameraId').value.trim();
+    if (!cameraId) { setStatus('u', 'err', 'Camera ID is required'); return; }
+    const creds = validateCredentials('u');
+    if (!creds) return;
+
+    const isStreaming = streamPollTimer !== null;
+
+    if (isStreaming) {
+      // ── stop ──
+      stopStreamPolling();
+      setStreamButtonState(false);
+      const label = document.getElementById('stream-label');
+      label.classList.remove('visible');
+      label.textContent = '';
+      setStatus('u', 'loading', 'Stopping stream…');
+      try {
+        await post(`${BASE}/cameras/stream/stop`, { ...creds, cameraId });
+        setStatus('u', 'ok', 'Stream stopped');
+      } catch (e) {
+        setStatus('u', 'err', e.message);
+      }
+    } else {
+      // ── start ──
+      setStatus('u', 'loading', 'Starting stream…');
+      const btn = document.getElementById('stream-btn');
+      btn.disabled = true;
+      try {
+        await post(`${BASE}/cameras/stream`, { ...creds, cameraId });
+        setStreamButtonState(true);
+        setStatus('u', 'ok', 'Streaming…');
+        const label = document.getElementById('stream-label');
+        label.textContent = 'Bytes received: 0';
+        label.classList.add('visible');
+        streamPollTimer = setInterval(async () => {
+          try {
+            const data = await post(`${BASE}/cameras/stream`, { ...creds, cameraId });
+            label.textContent = `Bytes received: ${data.totalBytesReceived.toLocaleString()}`;
+          } catch {
+            stopStreamPolling();
+            setStreamButtonState(false);
+            label.classList.remove('visible');
+            setStatus('u', 'err', 'Stream poll failed');
+          }
+        }, 1000);
+      } catch (e) {
+        setStatus('u', 'err', e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
   }
 
   function esc(str) {

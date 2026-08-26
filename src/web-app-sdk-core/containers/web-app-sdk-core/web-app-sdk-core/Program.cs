@@ -1,9 +1,10 @@
+using System.Collections.Concurrent;
 using TestWebApp;
-using VideoOS.Platform.SDK.Core;
 using VideoOS.Platform.SDK.Core.Configuration;
 using VideoOS.Platform.SDK.Core.Configuration.Filtering;
 using VideoOS.Platform.SDK.Core.Configuration.Items;
 using VideoOS.Platform.SDK.Core.Extensions;
+using VideoOS.Platform.SDK.Core.Media;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMipServices();
@@ -101,6 +102,50 @@ app.MapPost("/cameras/update", async (CameraUpdateRequest request, IServiceProvi
     }
 });
 
+// Starts live streaming for a camera (if not already started) and returns total bytes received.
+app.MapPost("/cameras/stream", async (CameraStreamRequest request, IServiceProvider serviceProvider) =>
+{
+    try
+    {
+        if (!Guid.TryParse(request.CameraId, out var cameraGuid))
+            return Results.BadRequest(new { error = $"Invalid camera ID: '{request.CameraId}'" });
+
+        if (CameraStreams.ActiveStreams.TryGetValue(request.CameraId, out var existing))
+            return Results.Ok(new CameraStreamResponse(request.CameraId, existing.TotalBytesReceived, false));
+
+        var session = SessionHelper.CreateSessionWithServerConfigurationProvided(
+            serviceProvider, request.ServerUrl, request.UserType, request.Username, request.Password);
+
+        await SessionHelper.WaitForTokenAsync(session);
+
+        var state = new CameraStreamState();
+        var rawSource = new RawSource(session, RawSourceMode.Live, cameraGuid, null);
+        rawSource.DataReady += (_, e) => Interlocked.Add(ref state.TotalBytesReceivedField, e.Data?.Length ?? 0);
+
+        state.Source = rawSource;
+        CameraStreams.ActiveStreams[request.CameraId] = state;
+
+        _ = rawSource.Start(CancellationToken.None);
+
+        return Results.Ok(new CameraStreamResponse(request.CameraId, 0, true));
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+// Stops an active stream for the specified camera.
+app.MapPost("/cameras/stream/stop", (CameraStreamRequest request) =>
+{
+    if (CameraStreams.ActiveStreams.TryRemove(request.CameraId, out var state))
+    {
+        state.Source?.Stop();
+        return Results.Ok(new { cameraId = request.CameraId, stopped = true });
+    }
+    return Results.Ok(new { cameraId = request.CameraId, stopped = false });
+});
+
 app.Run();
 
 public record SessionRequest(string ServerUrl, string UserType, string? Username, string? Password);
@@ -108,3 +153,17 @@ public record ConfigResponse(string? ServerUrl);
 public record SessionResponse(string Id, string ServerUri, string Token);
 public record CameraResponse(string Id, string Name, string Description);
 public record CameraUpdateRequest(string ServerUrl, string UserType, string? Username, string? Password, string CameraId, string? Name, string? Description);
+public record CameraStreamRequest(string ServerUrl, string UserType, string? Username, string? Password, string CameraId);
+public record CameraStreamResponse(string CameraId, long TotalBytesReceived, bool StreamStarted);
+
+public class CameraStreamState
+{
+    public long TotalBytesReceivedField;
+    public long TotalBytesReceived => Interlocked.Read(ref TotalBytesReceivedField);
+    public RawSource? Source { get; set; }
+}
+
+public static class CameraStreams
+{
+    public static readonly ConcurrentDictionary<string, CameraStreamState> ActiveStreams = new();
+}
