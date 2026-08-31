@@ -38,7 +38,7 @@ func mainReturnWithError() error {
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
 	// Create kafka client
-	topic := "samples.my-topic"
+	topic := "pub.samples.kafka-app.my-topic"
 	cl, err := kgo.NewClient(
 		kgo.SeedBrokers(bootstrapServer),
 		kgo.ConsumeResetOffset(kgo.NewOffset().AtEnd()),
