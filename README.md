@@ -37,7 +37,7 @@ To ensure everything runs smoothly, make sure the following tools are installed 
 * [Web App SDK Core](src/web-app-sdk-core/)
 
 ## First steps
-Navigate to the [Developer Portal](https://portal.developer.milestonesys.com/) and download App Builder from the `Downloads and Tools` section. Extract the App Builder package and place the Bash and PowerShell scripts in the [build](./build/) directory.
+Navigate to the [Developer Portal](https://portal.developer.milestonesys.com/) and download App Builder from the `Downloads and Tools` section. Extract the App Builder package and place `app-builder.sh` (and `app-builder.ps1`, if you use PowerShell) in the [build](./build/) directory alongside `common.mak`.
 
 ### Running a sample
 This repository is structured in two main directories. 
