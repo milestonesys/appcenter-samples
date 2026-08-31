@@ -47,11 +47,11 @@ Excerpt from `app-definition.yaml`:
 messaging:
   kafka:
     consumerTopics:
-    - name: "samples.my-topic"
+    - name: "pub.samples.kafka-app.my-topic"
     producerTopics:
-    - name: "samples.my-topic"
+    - name: "pub.samples.kafka-app.my-topic"
 ```
-Both services reference the same topic (`samples.my-topic`). The platform provisions access and injects connection details.
+Both services reference the same topic (`pub.samples.kafka-app.my-topic`). The platform provisions access and injects connection details.
 
 Services:
 - `samples-producer-service` -> container `sandbox.io/kafka/producer:1.0.0`
@@ -72,7 +72,7 @@ Consumer snippet (simplified):
 bootstrapServer := os.Getenv("KAFKA_BOOTSTRAP_SERVER")
 cl, err := kgo.NewClient(
   kgo.SeedBrokers(bootstrapServer),
-  kgo.ConsumeTopics("samples.my-topic"),
+  kgo.ConsumeTopics("pub.samples.kafka-app.my-topic"),
 )
 ```
 
