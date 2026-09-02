@@ -59,17 +59,17 @@ Services:
 
 ## Environment Variables
 
-The code expects `KAFKA_BOOTSTRAP_SERVER` to be set by the platform; it is automatically injected when you define Kafka topics in the `messaging.kafka` block of your `app-definition.yaml`.
+The code expects `KAFKA_CLUSTER_BOOTSTRAP_SERVER` to be set by the platform; it is automatically injected when you define Kafka topics in the `messaging.kafka` block of your `app-definition.yaml`.
 
 Producer snippet:
 ```go
-bootstrapServer := os.Getenv("KAFKA_BOOTSTRAP_SERVER")
+bootstrapServer := os.Getenv("KAFKA_CLUSTER_BOOTSTRAP_SERVER")
 cl, err := kgo.NewClient(kgo.SeedBrokers(bootstrapServer))
 ```
 
 Consumer snippet (simplified):
 ```go
-bootstrapServer := os.Getenv("KAFKA_BOOTSTRAP_SERVER")
+bootstrapServer := os.Getenv("KAFKA_CLUSTER_BOOTSTRAP_SERVER")
 cl, err := kgo.NewClient(
   kgo.SeedBrokers(bootstrapServer),
   kgo.ConsumeTopics("samples.my-topic"),
