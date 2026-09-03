@@ -89,7 +89,7 @@ app.MapPost("/cameras/update", async (CameraUpdateRequest request, IServiceProvi
             ?? throw new Exception($"Camera with ID '{request.CameraId}' not found.");
 
         if (request.Name is not null) camera.Name = request.Name;
-        if (request.Description is not null) camera.Description = request.Description;
+        camera.Description = request.Description ?? "";
 
         // Save() persists the changes back to the VMS.
         await camera.Save();
