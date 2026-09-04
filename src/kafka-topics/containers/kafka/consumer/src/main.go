@@ -67,7 +67,7 @@ func hotReloadTLSDialer(caCertPath, clientCertPath, clientKeyPath string) func(c
 
 func mainReturnWithError() error {
 	// Get bootstrap server from environment
-	bootstrapServer := os.Getenv("KAFKA_CLUSTER_BOOTSTRAP_SERVER")
+	bootstrapServer := os.Getenv("KAFKA_BOOTSTRAP_SERVER")
 	if bootstrapServer == "" {
 		return errors.New("error getting bootstrap server from environment")
 	}
