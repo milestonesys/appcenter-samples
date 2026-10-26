@@ -9,9 +9,9 @@ prerequisites:
 messaging:
   kafka:
     consumerTopics:
-    - name: "app.samples.kafka-app.my-topic"
+    - name: "pub.samples.kafka-app.my-topic"
     producerTopics:
-    - name: "app.samples.kafka-app.my-topic"
+    - name: "pub.samples.kafka-app.my-topic"
 
 services:
 - name: samples-producer-service

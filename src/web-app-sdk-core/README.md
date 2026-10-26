@@ -4,7 +4,8 @@ A sample web application that demonstrates how to create sessions using the Vide
 
 ## Overview
 
-This sample is an ASP.NET Core web application with a static frontend. It exposes API endpoints for creating a `Session` using the VideoOS Platform SDK Core, querying cameras, and updating camera metadata.
+This sample is an ASP.NET Core web application with a static frontend. It exposes API endpoints for creating a `Session` using the VideoOS Platform SDK Core, querying cameras, and updating camera metadata. 
+Furthermore, it shows how to start streaming video using the `RawSource` class. The received stream is not used for anything but updating a counter.
 
 The implemented endpoints are:
 
@@ -14,6 +15,8 @@ The implemented endpoints are:
 | POST | `/session/create-with-server-config` | Creates a session with an explicit server URL and credentials |
 | POST | `/cameras` | Returns all cameras visible to the authenticated user |
 | POST | `/cameras/update` | Updates the `Name` and/or `Description` of a single camera |
+| POST | `/cameras/stream` | Starts streaming for a single camera |
+| POST | `/cameras/stream/stop` | Stops streaming for a single camera |
 
 The session creation endpoint supports four user types: `DefaultWindows`, `Windows`, `Basic`, and `External` (access token).
 

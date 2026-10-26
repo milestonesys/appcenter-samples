@@ -11,10 +11,9 @@ In the following we assume that
 * You have configured the system with the *sandbox* developer option enabled (use the `--cluster-sandbox` option for the installation wizard).
 * You have configured the system with the *kubernetes dashboard* and *helm dashboard* enabled (use the `--cluster-dev-mode` option for the installation wizard)
 * You have the credentials needed to SSH into one of the servers of the system (one of the master nodes).
-* You have to run the `init` script in the [build/](build/init.sh) directory to get the latest app builder and install any missing dependencies.
 * Remember to add the IP and port of your cluster's sandbox e.g. `10.10.10.10:5000` in the /etc/docker/daemon.json and restart the docker engine. `{"insecure-registries" : [ "10.10.10.10:5000" ]}`
 
-For more information, see our [App Center and App Builder documentation](https://doc.developer.milestonesys.com/appen/?path=Documentation)
+For more information, see our [App Center and App Builder documentation](https://portal.developer.milestonesys.com/)
 
 ### Additional dependencies
 To ensure everything runs smoothly, make sure the following tools are installed in the development machine:
@@ -37,7 +36,10 @@ To ensure everything runs smoothly, make sure the following tools are installed 
 * [RESTful Events API](src/restful-events-api/)
 * [Web App SDK Core](src/web-app-sdk-core/)
 
-## How to run a sample
+## First steps
+Navigate to the [Developer Portal](https://portal.developer.milestonesys.com/) and download App Builder from the `Downloads and Tools` section. Extract the App Builder package and place `app-builder.sh` (and `app-builder.ps1`, if you use PowerShell) in the [build](./build/) directory alongside `common.mak`.
+
+### Running a sample
 This repository is structured in two main directories. 
 
 ```bash
@@ -54,7 +56,7 @@ appcenter-samples
     ...
 ```
 
-In the `build` directory, you'll find the `common.mak` file, which defines shared commands for building and managing the samples. Each sample directory includes its own `Makefile` that imports `common.mak` to leverage these commands. Under the hood, `common.mak` uses the App Builder (find more info [here](https://doc.developer.milestonesys.com/appen/Documentation/App-Builder.pdf)), which provides all the necessary commands to build, push, and install your application.
+In the `build` directory, you'll find the `common.mak` file, which defines shared commands for building and managing the samples. Each sample directory includes its own `Makefile` that imports `common.mak` to leverage these commands. Under the hood, `common.mak` uses the App Builder, which provides all the necessary commands to build, push, and install your application.
 
 To work with a sample, navigate to its directory (where the `Makefile` is located) and run `make build` to build the Docker image and Helm chart for that sample.
 

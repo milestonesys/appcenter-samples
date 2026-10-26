@@ -79,7 +79,7 @@ func mainReturnWithError() error {
 	// Create kafka client. franz-go clones the TLS config on every dial, so the
 	// hot-reloading callbacks below are re-run whenever the client (re)connects
 	// after Strimzi rotates the cluster/client certs.
-	topic := "app.samples.kafka-app.my-topic"
+	topic := "pub.samples.kafka-app.my-topic"
 	cl, err := kgo.NewClient(
 		kgo.SeedBrokers(bootstrapServer),
 		kgo.Dialer(hotReloadTLSDialer(

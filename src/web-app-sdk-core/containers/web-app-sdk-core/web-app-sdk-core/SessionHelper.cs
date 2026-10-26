@@ -10,7 +10,7 @@ public class SessionHelper
 {
     /// <summary>
     /// Creates a <see cref="Session"/> with an explicit server URL and credentials.
-    /// Supported user types: DefaultWindows, Windows, Basic, External.
+    /// Supported user types: Windows, Basic, External.
     /// </summary>
     public static Session CreateSessionWithServerConfigurationProvided(IServiceProvider serviceProvider, string serverUrl, string userType, string? username = null, string? password = null)
     {
@@ -19,11 +19,10 @@ public class SessionHelper
 
         return userType switch
         {
-            "DefaultWindows" => new Session(serverConfiguration, serviceProvider, new DefaultWindowsUser()),
             "Windows" => new Session(serverConfiguration, serviceProvider, new WindowsUser(username ?? "", password ?? "")),
             "Basic" => new Session(serverConfiguration, serviceProvider, new BasicUser(username ?? "", password ?? "")),
             "External" => new Session(serverConfiguration, serviceProvider, password ?? ""),
-            _ => throw new ArgumentException($"Invalid user type: {userType}. Valid types: DefaultWindows, Windows, Basic, External")
+            _ => throw new ArgumentException($"Invalid user type: {userType}. Valid types: Windows, Basic, External")
         };
     }
 
