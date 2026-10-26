@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"strconv"
@@ -28,9 +31,44 @@ func mainReturnWithCode() int {
 	}
 }
 
+// hotReloadTLSDialer returns a dial function that builds a fresh tls.Config,
+// reading the CA cert and client cert/key from disk, on every connection rather
+// than once at startup. Since franz-go dials afresh whenever it (re)connects,
+// this lets the client pick up rotated certs (kept in sync from the Strimzi
+// secrets) without needing a restart, while keeping standard TLS verification.
+func hotReloadTLSDialer(caCertPath, clientCertPath, clientKeyPath string) func(context.Context, string, string) (net.Conn, error) {
+	netDialer := &net.Dialer{Timeout: 10 * time.Second}
+	return func(ctx context.Context, network, host string) (net.Conn, error) {
+		caCert, err := os.ReadFile(caCertPath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read CA cert: %w", err)
+		}
+		caCertPool := x509.NewCertPool()
+		if !caCertPool.AppendCertsFromPEM(caCert) {
+			return nil, errors.New("failed to parse CA certificate")
+		}
+		clientCert, err := tls.LoadX509KeyPair(clientCertPath, clientKeyPath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load client certificate/key: %w", err)
+		}
+		serverName, _, err := net.SplitHostPort(host)
+		if err != nil {
+			return nil, fmt.Errorf("unable to split host:port for dialing: %w", err)
+		}
+		return (&tls.Dialer{
+			NetDialer: netDialer,
+			Config: &tls.Config{
+				RootCAs:      caCertPool,
+				Certificates: []tls.Certificate{clientCert},
+				ServerName:   serverName,
+			},
+		}).DialContext(ctx, network, host)
+	}
+}
+
 func mainReturnWithError() error {
 	// Get bootstrap server from environment
-	bootstrapServer := os.Getenv("KAFKA_BOOTSTRAP_SERVER")
+	bootstrapServer := os.Getenv("KAFKA_CLUSTER_BOOTSTRAP_SERVER")
 	if bootstrapServer == "" {
 		return errors.New("error getting bootstrap server from environment")
 	}
@@ -39,13 +77,24 @@ func mainReturnWithError() error {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
-	// Create kafka client
-	topic := "pub.samples.kafka-app.my-topic"
-	cl, err := kgo.NewClient(kgo.SeedBrokers(bootstrapServer))
+	// Create kafka client. franz-go clones the TLS config on every dial, so the
+	// hot-reloading callbacks below are re-run whenever the client (re)connects
+	// after Strimzi rotates the cluster/client certs.
+	cl, err := kgo.NewClient(
+		kgo.SeedBrokers(bootstrapServer),
+		kgo.Dialer(hotReloadTLSDialer(
+			"/usr/local/share/ca-certificates/kafka_ca.crt",
+			"/opt/kafka/user-certs/user.crt",
+			"/opt/kafka/user-certs/user.key",
+		)),
+	)
+
 	if err != nil {
 		return err
 	}
 	defer cl.Close()
+
+	topic := "pub.samples.kafka-app.my-topic"
 
 	// Produce messages until told otherwise
 	ctx, cancel := context.WithCancel(context.Background())
