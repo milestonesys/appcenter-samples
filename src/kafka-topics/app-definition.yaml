@@ -4,7 +4,7 @@ version: 1.0.0
 description: "An App that uses kafka to produce and consume messages"
 
 prerequisites:
-  systemVersion: ">=0.3.10"
+  systemVersion: ">=0.3.24"
 
 messaging:
   kafka:
