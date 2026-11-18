@@ -1,7 +1,7 @@
 name: "restful-config-api-app"
 realm: "samples"
-version: 1.0.0
-description: "A sample application demonstrating using the RESTful Config API"
+version: 1.1.0
+description: "A sample application demonstrating using the RESTful Config API from a Smart Client microfrontend"
 
 prerequisites:
   systemVersion: ">=0.3.10"
@@ -10,14 +10,34 @@ services:
 - name: pub-samples-restful-config-api
   routes:
   - name: restful-config-api-route
-    port: 8501
-    targetPort: 8501
+    port: 80
+    targetPort: 8080
     ingress:
-      rootPath: "/api/samples/restful-config-api"
+      rootPath: "/mfe/samples/restful-config-api"
       redirectPath: "/"
       rules:
+      # The BFF requires the access token of the Smart Client session
+      - path: "/api/"
+        scopes: ["managementserver"]
+      # The microfrontend itself (remote-entry.js, manifest.json and chunks)
       - path: "/"
 
   containers:
   - name: restful-config-api-container
-    image: sandbox.io/restful-config-api:1.0.0
+    image: sandbox.io/restful-config-api:1.1.0
+
+microfrontends:
+  - id: "f542b330-ff2d-e402-98dc-18dc17101989"
+    name: "samples-restful-config-api"
+    path: "/mfe/samples/restful-config-api/remote-entry.js"
+    version: 1.1.0
+    namespace: "samples-restful-config-api"
+    audience:
+      requiredShellAPI: ">=1.0.2"
+      requiredPermissions: []
+      targetExperiences: ["operator", "administrator", "integrator", "supporter", "developer"]
+      targetApplications: ["smart-client"]
+    metadata:
+      module: "restful-config-api"
+      bundler: "webpack"
+      framework: "react"

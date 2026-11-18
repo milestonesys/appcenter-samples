@@ -268,14 +268,8 @@ class Gateway:
             )
             res.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            # you could catch 400 Bad Request etc. here
+            # The error response is still returned so the caller can report it
             print(err)
-        except requests.exceptions.ConnectionError as err:
-            raise SystemExit(err)
-        except requests.exceptions.Timeout as err:
-            raise SystemExit(err)
-        except requests.exceptions.RequestException as err:
-            raise SystemExit(err)
         return res
 
     def __url(

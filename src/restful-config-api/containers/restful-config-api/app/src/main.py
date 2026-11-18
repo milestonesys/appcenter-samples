@@ -1,169 +1,105 @@
+"""
+Backend-for-frontend (BFF) for the RESTful Config API microfrontend.
+
+The microfrontend runs inside the Smart Client. The shell adds the bearer access token of the
+current Smart Client session to every request it makes, and this service forwards that token to
+the XProtect API Gateway. No username or password is ever handled here.
+
+The service also serves the built microfrontend (remote-entry.js, manifest.json, ...).
+"""
 import json
 import os
+from pathlib import Path
+from typing import Optional
+
 import requests
-from identity_provider import IdentityProvider
+import uvicorn
+from fastapi import Depends, FastAPI, Header, HTTPException, Response
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+
 from api_gateway import Gateway
-import streamlit as st
 
-def main():
-    st.title("RESTful Config API - Python")
+RESOURCE = "userDefinedEvents"
 
-    # Environment variables available for a container
-    identity_provider_url = os.getenv("SYSTEM_IDENTITY_PROVIDER") # The URL of the Identity Provider of the System
-    legacy_use_tls = os.getenv("LEGACY_USE_TLS") # Whether the XProtect server uses TLS
-    legacy_management_server = os.getenv("LEGACY_MANAGEMENT_SERVER") # The hostname of the Management Server in XProtect
+# Environment variables available for a container
+legacy_use_tls = os.getenv("LEGACY_USE_TLS", "true")  # Whether the XProtect server uses TLS
+legacy_management_server = os.getenv("LEGACY_MANAGEMENT_SERVER", "")  # Hostname of the Management Server
 
-    if legacy_use_tls.lower() == "true":
-        server_url = "https://" + legacy_management_server
-    else:
-        server_url = "http://" + legacy_management_server
+scheme = "https" if legacy_use_tls.lower() == "true" else "http"
+server_url = f"{scheme}://{legacy_management_server}"
 
-    st.info(f"XProtect server URL: {server_url}")
+# Location of the built microfrontend. Defaults to ../client/dist relative to this file's app dir.
+client_dir = Path(os.getenv("CLIENT_DIR", Path(__file__).resolve().parent.parent / "client"))
 
-    # Input data
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    is_basic_user = st.selectbox("Use basic authentication?", ("True", "False"))
-    event_name = st.text_input("Name of user defined event to create")
+api_gateway = Gateway(server_url)
+app = FastAPI(title="RESTful Config API sample")
 
-    # Run demo flow
-    if st.button("Run Demo"):
-        # Clear any previous delete response when starting a new demo
-        if 'delete_response' in st.session_state:
-            del st.session_state.delete_response
-        run_demo(username, password, is_basic_user == "True", server_url, identity_provider_url, event_name)
-    
-    update_user_defined_event_section()
-    delete_user_defined_event_section()
-    display_delete_response_section()
 
-def run_demo(username: str, password: str, is_basic_user: bool, server_url: str, identity_provider_url: str, event_name: str) -> None:
-    
-    # Initialize session in session_state to ensure that we stay logged in during demo flow
-    st.session_state.session = requests.Session()
-    
-    # Now authenticate using the identity provider and get access token
-    identity_provider = IdentityProvider(identity_provider_url)
-    response = identity_provider.get_token(
-        st.session_state.session, username, password, is_basic_user
+class EventBody(BaseModel):
+    name: str
+
+
+def get_token(authorization: Optional[str] = Header(default=None)) -> str:
+    """Extract the Smart Client session's bearer token from the request.
+
+    The token is not validated here; the API Gateway validates it when we forward it.
+    """
+    scheme_name, _, token = (authorization or "").partition(" ")
+    if scheme_name.lower() != "bearer" or not token.strip():
+        raise HTTPException(status_code=401, detail="Missing bearer access token")
+    return token.strip()
+
+
+def relay(response: requests.Response) -> Response:
+    """Pass the API Gateway's status code and JSON body on to the microfrontend."""
+    return Response(
+        content=response.content,
+        status_code=response.status_code,
+        media_type=response.headers.get("content-type", "application/json"),
     )
 
-    with st.expander("View IDP access token response"):
-        if response.status_code == 200:
-            token_response = response.json()
-            st.json(token_response)
-            access_token = token_response[
-                "access_token"
-            ]  # The token that we'll use for RESTful API calls
-        else:
-            error = response.json()["error"]
-            st.error("Failed to get access token")
-            st.write(error)
-            return
 
-    # Create an API Gateway
-    api_gateway = Gateway(server_url)
+def call_gateway(call):
+    """Run a gateway call on a fresh session, mapping connection problems to 502."""
+    with requests.Session() as session:
+        try:
+            return relay(call(session))
+        except requests.exceptions.RequestException as err:
+            raise HTTPException(status_code=502, detail=f"Could not reach the XProtect server: {err}")
 
-    # Demo of creating, updating, and deleting a user-defined event through the API Gateway
-    create_user_defined_event(api_gateway, access_token, event_name)
 
-def create_user_defined_event(api_gateway: Gateway, token: str, event_name: str) -> None:
-    """Create a user-defined event"""
-    
-    # Create a user defined event
-    payload = json.dumps({"name": event_name})
-    response = api_gateway.create_item(st.session_state.session, "userDefinedEvents", payload, token)
-    with st.expander("View create item result"):
-        if response.status_code == 201:
-            create_result = response.json()["result"]
-            st.json(create_result)
-        else:
-            error = response.json()["error"]
-            st.error("Failed to create event")
-            st.json(error)
-            return
+@app.get("/api/server-info")
+def server_info():
+    return {"serverUrl": server_url}
 
-    # Get the user defined event that we just created
-    event_id = create_result["id"]
 
-    # Store essential data in session state for button callbacks
-    st.session_state.event_id = event_id
-    st.session_state.api_gateway = api_gateway
-    st.session_state.token = token
+@app.post("/api/user-defined-events")
+def create_event(body: EventBody, token: str = Depends(get_token)):
+    payload = json.dumps({"name": body.name})
+    return call_gateway(lambda s: api_gateway.create_item(s, RESOURCE, payload, token))
 
-    response = api_gateway.get_single(st.session_state.session, "userDefinedEvents", event_id, token)
-    with st.expander("View get item result"):
-        if response.status_code == 200:
-            event_data = response.json()["data"]
-            st.json(event_data)
-        else:
-            error = response.json()["error"]
-            st.error("Failed to get event")
-            st.json(error)
-            return
 
-def update_user_defined_event_section() -> None:
-    """Update user-defined event"""
+@app.get("/api/user-defined-events/{event_id}")
+def get_event(event_id: str, token: str = Depends(get_token)):
+    return call_gateway(lambda s: api_gateway.get_single(s, RESOURCE, event_id, token))
 
-    if 'event_id' not in st.session_state:
-        return
 
-    new_event_name = st.text_input("Enter new event name:")
-    if st.button("Update Event"):
-        payload = json.dumps({"name": new_event_name})
-        response = st.session_state.api_gateway.update_item(
-            st.session_state.session, "userDefinedEvents", payload, st.session_state.event_id, st.session_state.token
-        )
+@app.put("/api/user-defined-events/{event_id}")
+def update_event(event_id: str, body: EventBody, token: str = Depends(get_token)):
+    payload = json.dumps({"name": body.name})
+    return call_gateway(lambda s: api_gateway.update_item(s, RESOURCE, payload, event_id, token))
 
-        with st.expander("Update item data"):
-            if response.status_code == 200:
-                update_data = response.json()["data"]
-                st.success("Event updated successfully!")
-                st.json(update_data)
-            else:
-                error = response.json()["error"]
-                st.error("Failed to update event")
-                st.write(error)
 
-def delete_user_defined_event_section() -> None:
-    """Delete user-defined event"""
+@app.delete("/api/user-defined-events/{event_id}")
+def delete_event(event_id: str, token: str = Depends(get_token)):
+    return call_gateway(lambda s: api_gateway.delete_item(s, RESOURCE, event_id, token))
 
-    if 'event_id' not in st.session_state:
-        return
-    
-    if st.button("Delete Event"):
-        response = st.session_state.api_gateway.delete_item(
-            st.session_state.session, "userDefinedEvents", st.session_state.event_id, st.session_state.token
-        )
-        
-        if response.status_code == 200:
-            delete_item_state = response.json()
-            
-            # Store delete response in session state to persist it
-            st.session_state.delete_response = delete_item_state
-            
-            # Clear the event-related session state
-            if 'event_id' in st.session_state:
-                del st.session_state.event_id
-            if 'api_gateway' in st.session_state:
-                del st.session_state.api_gateway  
-            if 'token' in st.session_state:
-                del st.session_state.token
-            # Note: Keep the st.session_state.session for potential future operations
-            
-            # Refresh the page 
-            st.rerun()
-        else:
-            error = response.json()["error"]
-            st.error("Failed to delete event")
-            st.write(error)
 
-def display_delete_response_section() -> None:
-    """Display the delete response if available."""
-    if 'delete_response' in st.session_state:
-        st.success("Event deleted successfully!")
-        with st.expander("View delete response"):
-            st.json(st.session_state.delete_response)
+# Registered last so it does not shadow the API routes above.
+if client_dir.is_dir():
+    app.mount("/", StaticFiles(directory=client_dir), name="client")
+
 
 if __name__ == "__main__":
-    main()
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "8080")))

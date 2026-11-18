@@ -1,0 +1,26 @@
+{
+  "id": "f542b330-ff2d-e402-98dc-18dc17101989",
+  "namespace": "restful_config_api",
+  "framework": {
+    "name": "react",
+    "version": "19.2.3",
+    "stripped": true
+  },
+  "bundler": "webpack",
+  "dependencies": [],
+  "fragments": [
+    {
+      "id": "f390d5b0-97b9-bd3e-eb60-d53bfdb9dfda",
+      "moduleName": "App",
+      "url": "/restful-config-api",
+      "position": "main-content",
+      "permissions": [],
+      "actions": [],
+      "mainmenu": {
+        "title": "RESTful Config API",
+        "translation-key": "restfulconfigapi.app",
+        "icon": ""
+      }
+    }
+  ]
+}
