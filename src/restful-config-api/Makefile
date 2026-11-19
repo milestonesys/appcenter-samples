@@ -6,4 +6,4 @@ CLIENT_DIR := containers/restful-config-api/client
 build-client:
 	cd $(CLIENT_DIR) && npm ci && npm run build:federation
 
-build-image: build-client
+$(addprefix containers/,$(IMAGES)): build-client

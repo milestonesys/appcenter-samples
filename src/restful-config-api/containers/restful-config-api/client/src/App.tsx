@@ -85,7 +85,6 @@ const App: React.FC<TMfeProps<{}>> = () => {
   const runDemo = () =>
     run(async () => {
       setSteps([]);
-      setEventId(undefined);
 
       const created = await createEvent(eventName);
       setSteps([{ title: 'Create item result', result: created }]);

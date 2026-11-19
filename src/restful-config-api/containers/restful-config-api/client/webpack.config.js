@@ -14,7 +14,7 @@ const pkg = require('./package.json');
 // token, so ACCESS_TOKEN (a bearer token for the XProtect IDP) is attached to proxied requests.
 // BACKEND_URL is the Python backend (see ../app/src/main.py).
 const accessToken = process.env.ACCESS_TOKEN;
-const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
+const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
 
 export default (env = {}, argv = {}) => {
   const isStandalone = env.hasOwnProperty('standalone');
