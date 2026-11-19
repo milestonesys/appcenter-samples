@@ -1,0 +1,14 @@
+{
+  "servers": {
+    "app-platform-knowledge": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@milestone/app-platform-knowledge-mcp-server"]
+    },
+    "mui": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["--registry", "https://registry.npmjs.org", "-y", "@mui/mcp@latest"]
+    }
+  }
+}

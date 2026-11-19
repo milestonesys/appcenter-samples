@@ -1,6 +1,8 @@
 # RESTful Config API Sample
 
-A sample application demonstrating how to use the XProtect API Gateway from a Python application. The sample logs into the server, creates, gets, updates, and deletes a user-defined event, with diagnostic output along the way. The sample uses [Streamlit](https://streamlit.io/) for creating a web interface.
+A sample application demonstrating how to use the XProtect API Gateway from an App Center application. The sample creates, gets, updates, and deletes a user-defined event, with diagnostic output along the way.
+
+The frontend is a microfrontend (MFE) for the Smart Client, built with React and Module Federation. It needs no login: the Smart Client shell adds the access token of the current Smart Client session to every request the MFE makes, and a small Python backend-for-frontend - aka. BFF - (FastAPI) forwards that token to the XProtect API Gateway. Operations are therefore performed as the user who is signed in to the Smart Client.
 
 ![RESTful Config API Sample](./../../img/restful-config-api.png)
 
@@ -8,97 +10,74 @@ A sample application demonstrating how to use the XProtect API Gateway from a Py
 
 - XProtect installation
 - The API Gateway installed on the same host as the management server
-- A user with the Administrators role
-- Python version 3.10 or newer
+- A Smart Client version with microfrontend support (2026 R1 or later), signed in with a user that has the Administrators role
+- **System Native Shell App** (`system-native-shell-app`) installed from the App Center on the same App Platform
+- Python version 3.10 or newer and Node.js 18 or newer (for building)
+- Access to the `@milestone` npm registry, see the `.npmrc` file in `containers/restful-config-api/client`. For further information on how to do this please refer to the [NPM Authentication Guide](https://portal.developer.milestonesys.com/docs/npm-auth-guide) on the Milestone Developer Portal
 
-## Environment Setup
+## How it works
+
+```
+Smart Client shell ── loads /mfe/samples/restful-config-api/remote-entry.js (the MFE)
+        │
+        │  fetch /mfe/samples/restful-config-api/api/...
+        │  (shell adds "Authorization: Bearer <session access token>")
+        ▼
+Python BFF (FastAPI, main.py) ── forwards the same token ──▶ XProtect API Gateway
+```
+
+- `app-definition.yaml` registers the MFE in the `microfrontends` section, targeting the `smart-client`, and exposes both the MFE files and the `/api/` routes through the ingress. The `/api/` rule requires the `managementserver` scope.
+- The backend does not validate the token itself; the API Gateway does when the token is forwarded. Requests without a bearer token are rejected with `401`.
 
 ### Environment Variables
 
-This sample is designed to run in a container where the following environment variables are provided by the container runtime:
+The container runtime provides these variables:
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `SYSTEM_IDENTITY_PROVIDER` | URL of the Identity Provider | `https://your-management-server.com/IDP` |
 | `LEGACY_USE_TLS` | Whether XProtect server uses TLS | `true` or `false` |
 | `LEGACY_MANAGEMENT_SERVER` | Management Server hostname | `your-management-server.com` |
 
-For local development, set these variables in the `.env` file.
+## Local Development
 
-### Local Development Setup
-
-1. **Copy environment configuration:**
+1. **Run the backend:**
    ```bash
-   # Linux/macOS/Git Bash
-   cp .env.example .env
-   ```
-   ```powershell
-   # Windows PowerShell
-   Copy-Item .env.example .env
-   ```
-   ```cmd
-   # Windows Command Prompt
-   copy .env.example .env
-   ```
-
-2. **Configure your environment:**
-   Edit the `.env` file with your XProtect server details:
-   ```env
-   SYSTEM_IDENTITY_PROVIDER=https://your-management-server.com/IDP
-   LEGACY_USE_TLS=true
-   LEGACY_MANAGEMENT_SERVER=your-management-server.com
-   ```
-
-3. **Install dependencies:**
-   ```bash
-   cd containers/restful-config-api
+   cd containers/restful-config-api/app
    pip install -r requirements.txt
+   cd src
+   LEGACY_USE_TLS=true LEGACY_MANAGEMENT_SERVER=your-management-server.com python main.py
    ```
+   The backend listens on port 8080 (override with `PORT`). If `../client` contains a built MFE it is served as well.
 
-4. **Run the application:**
+2. **Run the MFE standalone:**
    ```bash
-   streamlit run main.py
+   cd containers/restful-config-api/client
+   npm install
+   ACCESS_TOKEN='<bearer token from the XProtect IDP>' BACKEND_URL=http://localhost:8080 npm start
    ```
+   In standalone mode there is no Smart Client shell to supply the session token, so the dev server attaches `ACCESS_TOKEN` to proxied `/api` requests. Open http://localhost:3003.
 
-### Container Deployment
-
-**Build the Docker image:**
-```bash
-docker build -t restful-config-api:1.0.0 -f containers/Dockerfile .
-```
-
-**Run the container:**
-```bash
-docker run -p 8501:8501 \
-  -e SYSTEM_IDENTITY_PROVIDER=https://your-management-server.com/IDP\
-  -e LEGACY_USE_TLS=true \
-  -e LEGACY_MANAGEMENT_SERVER=your-management-server.com \
-  restful-config-api:1.0.0
-```
-
-### App Center Deployment
-
-Use the make commands described in the top-level README file to build and manage the sample.
-
-When deployed through App Center, environment variables are automatically configured and should not be set manually. Remove the `.env` file before building and pushing your sample application to App Center.
+3. **Run in a shell:** `npm run start:federation` serves `remote-entry.js` from http://localhost:3003; register it in a shell with `{ registration: { mfe: { path: "http://localhost:3003/remote-entry.js" } } }`.
 
 ## Project Structure
 
 ```
 restful-config-api/
-├── .env.example                    # Environment variables template, only needed for local development
-├── app-definition.yaml             # App Center configuration
-├── Makefile                        # Build automation
+├── app-definition.yaml             # App Center configuration (incl. microfrontend registration)
+├── Makefile                        # Build automation (builds the MFE, then the image)
 ├── containers/
 │   └── restful-config-api/
 │       ├── Dockerfile              # Container build instructions
-│       └── app/
-│           ├── requirements.txt    # Python dependencies
-│           └── src/
-│               ├── __init__.py
-│               ├── main.py         # Main application code
-│               ├── api_gateway.py  # API Gateway client
-│               └── identity_provider.py # Authentication handler
+│       ├── app/
+│       │   ├── requirements.txt    # Python dependencies
+│       │   └── src/
+│       │       ├── main.py         # Backend-for-frontend, also serves the MFE
+│       │       └── api_gateway.py  # API Gateway client
+│       └── client/                 # The Smart Client microfrontend
+│           ├── public/manifest.json # MFE manifest and fragment definition
+│           ├── src/App.tsx         # UI
+│           ├── src/api.ts          # Calls to the backend
+│           └── webpack.config.js   # Module Federation configuration
 └── README.md                       # This file
 ```
 
@@ -110,18 +89,16 @@ This sample was ported from the existing protocol integration sample [RestfulCom
 
 1. **Create requirements file:** List all packages needed for pip installation based on your sample documentation
 
-2. **Add Streamlit web interface:** 
-   - Convert console application to web app using Streamlit
-   - Add `streamlit` to your requirements.txt
+2. **Add a backend-for-frontend and a microfrontend:**
+   - Convert the console application to a small HTTP API (this sample uses FastAPI) that takes the bearer token from the incoming request instead of logging in
+   - Build the user interface as a Smart Client microfrontend (see `containers/restful-config-api/client`, generated with `npx @milestone/create-mfe-app`)
 
 3. **Test locally:**
-   - Verify your sample works as a web application
-   - Test all functionality through the web interface
+   - Verify the backend and the MFE work together, see Local Development above
 
 4. **Containerize:**
    - Create Dockerfile following this sample's pattern
    - Test that your sample works in Docker container locally
-   - Reference: [Streamlit Docker deployment guide](https://docs.streamlit.io/deploy/tutorials/docker)
 
 5. **Deploy to App Center:**
    - Once container testing is successful, you can build, push, and install your application in the App Center, see details below.
@@ -154,4 +131,4 @@ make list
 make events
 ```
 
-The application will be accessible at `http://<system-ip>/api/samples/restful-config-api/`.
+Once installed, the **RESTful Config API** microfrontend is available in the Smart Client. The MFE files are served at `http://<system-ip>/mfe/samples/restful-config-api/`.
