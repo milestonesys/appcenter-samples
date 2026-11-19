@@ -2,7 +2,7 @@
 
 A sample application demonstrating how to use the XProtect API Gateway from an App Center application. The sample creates, gets, updates, and deletes a user-defined event, with diagnostic output along the way.
 
-The frontend is a microfrontend (MFE) for the Smart Client, built with React and Module Federation. It needs no login: the Smart Client shell adds the access token of the current Smart Client session to every request the MFE makes, and a small Python backend-for-frontend (FastAPI) forwards that token to the XProtect API Gateway. Operations are therefore performed as the user who is signed in to the Smart Client.
+The frontend is a microfrontend (MFE) for the Smart Client, built with React and Module Federation. It needs no login: the Smart Client shell adds the access token of the current Smart Client session to every request the MFE makes, and a small Python backend-for-frontend - aka. BFF - (FastAPI) forwards that token to the XProtect API Gateway. Operations are therefore performed as the user who is signed in to the Smart Client.
 
 ![RESTful Config API Sample](./../../img/restful-config-api.png)
 
@@ -13,7 +13,7 @@ The frontend is a microfrontend (MFE) for the Smart Client, built with React and
 - A Smart Client version with microfrontend support (2026 R1 or later), signed in with a user that has the Administrators role
 - **System Native Shell App** (`system-native-shell-app`) installed from the App Center on the same App Platform
 - Python version 3.10 or newer and Node.js 18 or newer (for building)
-- Access to the `@milestone` npm registry, see the `.npmrc` file in `containers/restful-config-api/client`
+- Access to the `@milestone` npm registry, see the `.npmrc` file in `containers/restful-config-api/client`. For further information on how to do this please refer to the [NPM Authentication Guide](https://portal.developer.milestonesys.com/docs/npm-auth-guide) on the Milestone Developer Portal
 
 ## How it works
 
